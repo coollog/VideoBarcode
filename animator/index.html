@@ -1,0 +1,35 @@
+<style>
+  #canvas {
+    border: 1px solid black;
+    outline: none;
+  }
+  #main {
+    min-width: 720px;
+    margin: 0 auto;
+  }
+</style>
+
+<div id="main">
+  <canvas id="canvas" width="720" height="480" tabindex="1"></canvas>
+</div>
+
+<script src="js/Assert.js"></script>
+<script src="js/Coordinate.js"></script>
+<script src="js/PriorityQueue.js"></script>
+<script src="js/Events.js"></script>
+<script src="js/Canvas.js"></script>
+<script src="js/DrawTimer.js"></script>
+<script src="js/Controller.js"></script>
+<script src="js/InputHandler.js"></script>
+
+<script>
+  const FPS = 60;
+
+  const canvas = new Canvas('canvas');
+
+  new InputHandler(canvas);
+
+  new Controller();
+
+  (new DrawTimer(canvas, FPS)).start();
+</script>
