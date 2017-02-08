@@ -4,17 +4,66 @@
     outline: none;
   }
   #main {
-    min-width: 720px;
+    max-width: 720px;
     margin: 0 auto;
+  }
+
+  #keyframes {
+    position: relative;
+  }
+  #kf-wrapper {
+    overflow-x: scroll;
+    margin-left: 5em;
+    max-width: 100%;
+    padding-bottom: 1em;
+  }
+  #kf-wrapper table {
+    overflow-x: visible;
+  }
+  .headcol {
+    position: absolute;
+    width: 5em;
+    left: 0;
+    top: auto;
+  }
+
+  #kf-wrapper td {
+    vertical-align: middle;
+    text-align: center;
+  }
+  #kf-wrapper td+td {
+    height: 1.5em;
+  }
+
+  #kf-sel :not(:first-child) {
+    min-width: 15px;
+    background: #c88;
+    cursor: pointer;
+    transition: 0.1s all ease-in-out;
+  }
+  #kf-sel :not(:first-child):hover {
+    background: #e00;
+  }
+  #kf-sel :not(:first-child).sel {
+    background: #e00;
   }
 </style>
 
 <div id="main">
   <canvas id="canvas" width="720" height="480" tabindex="1"></canvas>
+
+  <div id="keyframes">
+    <div id="kf-wrapper"><table></table></div>
+  </div>
+
+  <div id="controls">
+    <button id="but-add-polygon">Add Polygon</button>
+  </div>
 </div>
 
 <script src="js/Assert.js"></script>
 <script src="js/Coordinate.js"></script>
+<script src="js/PolygonModel.js"></script>
 <script src="js/PriorityQueue.js"></script>
 <script src="js/Events.js"></script>
 <script src="js/Canvas.js"></script>
@@ -32,4 +81,76 @@
   new Controller();
 
   (new DrawTimer(canvas, FPS)).start();
+</script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+  const keyframes = 64;
+  const framesps = 16;
+
+  function kf_addRow(rowId, rowName, rowContents) {
+    let row = `<tr id="${rowId}"><td class="headcol">${rowName}</td>`;
+
+    for (let i = 0; i < keyframes; i ++) {
+      const content = rowContents[i];
+      row += `<td index=${i}>${content}</td>`;
+    }
+
+    row += `</tr>`;
+    $('#keyframes table').append(row);
+  }
+
+  function makeKeyframeNumbers() {
+    let kfs = new Array(keyframes);
+
+    for (let i = 0; i < keyframes; i ++) {
+      kfs[i] = i;
+    }
+
+    kf_addRow(`kf-num`, ``, kfs);
+  }
+
+  function makeKeyframes() {
+    let kfs = new Array(keyframes);
+
+    for (let i = 0; i < keyframes; i ++) {
+      kfs[i] = ``;
+    }
+
+    kf_addRow(`kf-sel`, `Goto frame`, kfs);
+  }
+
+  function activateKeyframes() {
+    const kfelems = '#kf-sel :not(:first-child)';
+
+    $(kfelems).click(function() {
+      const isSel = $(this).hasClass('sel');
+
+      if (isSel) {
+        $(this).removeClass('sel');
+      } else {
+        $(kfelems).removeClass('sel');
+        $(this).addClass('sel');
+      }
+    });
+  }
+
+  function activateButtons() {
+    $('#but-add-polygon').click(function() {
+      const poly = new PolygonModel();
+      poly.addPoint(new Coordinate(5, 3));
+      poly.addPoint(new Coordinate(10, 3));
+
+      poly.addPoint(new Coordinate(6, 3));
+      console.log(poly);
+    });
+  }
+
+  $(function() {
+    makeKeyframeNumbers();
+    makeKeyframes();
+    activateKeyframes();
+
+    activateButtons();
+  });
 </script>
