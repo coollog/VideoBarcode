@@ -1,11 +1,49 @@
 // import 'Assert'
 // import 'Coordinate'
 
+/**
+ * Represents a polygon.
+ */
 class PolygonModel {
   constructor() {
     assertParameters(arguments);
 
     this._firstPoint = null;
+  }
+
+  get coords() {
+    let coords = [];
+
+    for (const pt of this.points) {
+      coords.push(pt.coord);
+    }
+
+    return coords;
+  }
+
+  get points() {
+    const firstPoint = this._firstPoint;
+
+    return {
+      [Symbol.iterator]() {
+        return {
+          _curPoint: firstPoint,
+          next() {
+            let value = undefined;
+            let done = true;
+            if (this._curPoint !== null) {
+              value = this._curPoint;
+              done = false;
+              this._curPoint = this._curPoint.next;
+            }
+            return {
+              value: value,
+              done: done
+            }
+          }
+        }
+      }
+    }
   }
 
   // Inserts a point between two closest points.
@@ -53,6 +91,7 @@ class PolygonModel {
       // Left is closer.
       if (minPtDist > distBetween) {
         ptLeft.insert(newPoint);
+        if (ptLeft === this._firstPoint) this._firstPoint = newPoint;
       } else if (ptLeftDist > distBetween) {
         minPt.append(newPoint);
       } else {
@@ -66,35 +105,12 @@ class PolygonModel {
         ptRight.append(newPoint);
       } else if (ptRightDist > distBetween) {
         minPt.insert(newPoint);
+        if (minPt === this._firstPoint) this._firstPoint = newPoint;
       } else {
         minPt.append(newPoint);
       }
     }
-  }
-
-  get points() {
-    const firstPoint = this._firstPoint;
-
-    return {
-      [Symbol.iterator]() {
-        return {
-          _curPoint: firstPoint,
-          next() {
-            let value = undefined;
-            let done = true;
-            if (this._curPoint !== null) {
-              value = this._curPoint;
-              done = false;
-              this._curPoint = this._curPoint.next;
-            }
-            return {
-              value: value,
-              done: done
-            }
-          }
-        }
-      }
-    }
+    console.log(coord);
   }
 };
 

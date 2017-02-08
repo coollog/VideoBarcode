@@ -38,7 +38,7 @@ class DrawTimer {
 
     this._canvas.clear();
 
-    Events.dispatch(DrawTimer.EVENT_TYPES.DRAW);
+    Events.dispatch(DrawTimer.EVENT_TYPES.DRAW, this._canvas);
     Events.dispatch(DrawTimer.EVENT_TYPES.STEP);
   }
 };

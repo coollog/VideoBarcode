@@ -11,6 +11,9 @@ class Canvas {
 
     this._canvas = document.getElementById(canvasId);
     this._context = this._canvas.getContext('2d');
+
+    // Maps from owners to priority-type tuples.
+    this._cursorMap = new Map();
   }
 
   get width() {
@@ -66,9 +69,25 @@ class Canvas {
     }
   }
 
+  // Draw a circle.
+  drawCircle(center, radius, color = undefined, stroke = false) {
+    assertParameters(arguments,
+        Coordinate, Number, [String, undefined], [Boolean, undefined]);
+
+    this._context.beginPath();
+    this._context.arc(...center, radius, 0, 2 * Math.PI, false);
+    if (stroke) {
+      this._context.strokeStyle = color;
+      this._context.stroke();
+    } else {
+      this._context.fillStyle = color;
+      this._context.fill();
+    }
+  }
+
   // Draw polygon shape (will apply color and stroke).
-  drawPolygon(coords, color) {
-    assertParameters(arguments, Array, String);
+  drawPolygon(coords, color, stroke = false) {
+    assertParameters(arguments, Array, String, [Boolean, undefined]);
 
     this._context.beginPath();
     this._context.moveTo(...coords[0].toArray());
@@ -77,8 +96,13 @@ class Canvas {
     }
     this._context.lineTo(...coords[0].toArray()); // To close the shape.
     this._context.closePath();
-    this._context.fillStyle = color;
-    this._context.fill();
+    if (stroke) {
+      this._context.strokeStyle = color;
+      this._context.stroke();
+    } else {
+      this._context.fillStyle = color;
+      this._context.fill();
+    }
   }
 
   // Draw text centered at coord.
@@ -138,9 +162,45 @@ class Canvas {
         this._canvas.height;
     return new Coordinate(x, y);
   }
+
+  // Adds to the cursor map a cursor type.
+  setCursorFor(owner, cursorType, priority) {
+    assertParameters(arguments, Object, String, Number);
+
+    this._cursorMap.set(owner, { priority, cursorType });
+    this._updateCursor();
+  }
+
+  // Updates the cursor with the highest priority from the cursor map.
+  _updateCursor() {
+    let topPriority = 0;
+    let topCursorType = Canvas.CURSOR_TYPE.DEFAULT;
+
+    for (const [owner, value] of this._cursorMap) {
+      const priority = value.priority;
+
+      if (priority >= topPriority) {
+        topPriority = priority;
+        topCursorType = value.cursorType;
+      }
+    }
+
+    this._cursor = topCursorType;
+  }
+
+  set _cursor(cursorType) {
+    assertParameters(arguments, String);
+
+    this._canvas.style.cursor = cursorType;
+  }
 }
 
 Canvas.RECTANGLE_TYPE = {
   STROKE: 0,
   FILL: 1
+};
+
+Canvas.CURSOR_TYPE = {
+  DEFAULT: 'default',
+  MOVE: 'move'
 };

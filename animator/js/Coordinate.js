@@ -78,4 +78,8 @@ class Coordinate {
 
     return [this._x, this._y];
   }
+
+  [Symbol.iterator]() {
+    return this.toArray()[Symbol.iterator]();
+  }
 };

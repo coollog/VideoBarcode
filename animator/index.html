@@ -61,12 +61,18 @@
   </div>
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="js/Assert.js"></script>
 <script src="js/Coordinate.js"></script>
 <script src="js/PolygonModel.js"></script>
+<script src="js/FrameModel.js"></script>
 <script src="js/PriorityQueue.js"></script>
 <script src="js/Events.js"></script>
+<script src="js/DOMInterface.js"></script>
 <script src="js/Canvas.js"></script>
+<script src="js/PolygonPointInterface.js"></script>
+<script src="js/PolygonInterface.js"></script>
+<script src="js/FrameInterface.js"></script>
 <script src="js/DrawTimer.js"></script>
 <script src="js/Controller.js"></script>
 <script src="js/InputHandler.js"></script>
@@ -83,7 +89,6 @@
   (new DrawTimer(canvas, FPS)).start();
 </script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script>
   const keyframes = 64;
   const framesps = 16;
@@ -135,22 +140,9 @@
     });
   }
 
-  function activateButtons() {
-    $('#but-add-polygon').click(function() {
-      const poly = new PolygonModel();
-      poly.addPoint(new Coordinate(5, 3));
-      poly.addPoint(new Coordinate(10, 3));
-
-      poly.addPoint(new Coordinate(6, 3));
-      console.log(poly);
-    });
-  }
-
   $(function() {
     makeKeyframeNumbers();
     makeKeyframes();
     activateKeyframes();
-
-    activateButtons();
   });
 </script>
