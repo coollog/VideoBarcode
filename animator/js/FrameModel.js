@@ -33,7 +33,6 @@ class FrameModel {
     for (const coord of FrameModel._DEFAULT_POLYGON) {
       poly.addPoint(coord);
     }
-    console.log(poly);
 
     const id = FrameModel._nextPolygonId ++;
     this._polygons[id] = poly;

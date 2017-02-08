@@ -54,12 +54,12 @@ class PolygonModel {
 
     if (this._firstPoint === null) {
       this._firstPoint = newPoint;
-      return;
+      return newPoint;
     }
 
     if (this._firstPoint.isLast) {
       this._firstPoint.append(newPoint);
-      return;
+      return newPoint;
     }
 
     // Find the two closest points (Euclidean distance).
@@ -110,7 +110,8 @@ class PolygonModel {
         minPt.append(newPoint);
       }
     }
-    console.log(coord);
+
+    return newPoint;
   }
 };
 
@@ -129,6 +130,11 @@ PolygonModel.Point = class {
 
   get coord() {
     return this._coord;
+  }
+  set coord(coord) {
+    assertParameters(arguments, Coordinate);
+
+    this._coord = coord;
   }
 
   get next() {

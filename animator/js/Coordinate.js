@@ -34,6 +34,10 @@ class Coordinate {
     this._y = y;
   }
 
+  get magnitude() {
+    return Math.sqrt(this._x * this._x + this._y * this._y);
+  }
+
   // Calculate distance to 'other' Coordinate.
   distanceTo(other) {
     assertParameters(arguments, Coordinate);

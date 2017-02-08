@@ -2,6 +2,7 @@
 // import 'Canvas'
 // import 'Coordinate'
 // import 'FrameModel'
+// import 'PolygonModel'
 // import 'PolygonPointInterface'
 
 /**
@@ -15,14 +16,14 @@ class PolygonInterface {
     this._id = polygonId;
     this._polygon = this._frameModel.getPolygon(polygonId);
 
-    for (const coord of this._scaledCoords) {
-      new PolygonPointInterface(coord);
-    }
+    this._pointInterfaces = new Set();
+    this._activated = false;
 
+    Events.on(InputHandler.EVENT_TYPES.CLICK_NO_DRAG, this._onClick, this);
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._draw, this);
   }
 
-  _scaleCoord(coord, toWidth, toHeight) {
+  static _scaleCoord(coord, toWidth, toHeight) {
     assertParameters(arguments, Coordinate, Number, Number);
 
     coord = coord
@@ -32,12 +33,70 @@ class PolygonInterface {
     return coord;
   }
 
+  static _inverseScaleCoord(toSize, coord, fromWidth, fromHeight) {
+    assertParameters(arguments, Number, Coordinate, Number, Number);
+
+    coord = coord
+        .translate(new Coordinate(-(fromWidth - fromHeight) / 2, 0))
+        .scale(toSize / fromHeight);
+
+    return coord;
+  }
+
+  activate() {
+    assertParameters(arguments);
+
+    for (const point of this._polygon.points) {
+      this._addPointInterface(point);
+    }
+    this._activated = true;
+  }
+
+  deactivate() {
+    assertParameters(arguments);
+
+    for (const pointInterface of this._pointInterfaces) {
+      pointInterface.destroy();
+    }
+    this._pointInterfaces.clear();
+    this._activated = false;
+  }
+
   get _scaledCoords() {
+    assertParameters(arguments);
+
     let scaledCoords = [];
     for (const coord of this._polygon.coords) {
-      scaledCoords.push(this._scaleCoord(coord, canvas.width, canvas.height));
+      scaledCoords.push(
+          PolygonInterface._scaleCoord(coord, canvas.width, canvas.height));
     }
     return scaledCoords;
+  }
+
+  _addPointInterface(point) {
+    assertParameters(arguments, PolygonModel.Point);
+
+    const newPoint = new PolygonPointInterface(
+        point,
+        PolygonInterface._scaleCoord,
+        PolygonInterface._inverseScaleCoord.bind(
+            this, PolygonInterface._AREA_SIZE));
+    this._pointInterfaces.add(newPoint);
+  }
+
+  _onClick(mousePosition, canvas) {
+    assertParameters(arguments, Coordinate, Canvas);
+
+    if (!this._activated) return;
+
+    // Add a new point.
+    const inverseScaledCoord = PolygonInterface._inverseScaleCoord(
+        PolygonInterface._AREA_SIZE,
+        mousePosition,
+        canvas.width,
+        canvas.height);
+    const newPoint = this._polygon.addPoint(inverseScaledCoord);
+    this._addPointInterface(newPoint);
   }
 
   _draw(canvas) {

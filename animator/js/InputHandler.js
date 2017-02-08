@@ -10,6 +10,9 @@ class InputHandler {
     this._canvas = canvas;
     this._dragging = false;
 
+    this._dragDistance = 0;
+    this._dragPosition = null;
+
     // Attach the event listeners.
     canvas.listen('mousedown', this._dragStart.bind(this));
     canvas.listen('mousemove', this._drag.bind(this));
@@ -24,12 +27,21 @@ class InputHandler {
 
     this._dragging = true;
     this._dispatchMouseEvent(e, InputHandler.EVENT_TYPES.DRAG_START);
+
+    // For click-no-drag.
+    this._dragPosition = this._canvas.getMousePosition(e);
+    this._dragDistance = 0;
   }
   _drag(e) {
     assertParameters(arguments, MouseEvent);
 
     if (!this._dragging) return;
     this._dispatchMouseEvent(e, InputHandler.EVENT_TYPES.DRAG);
+
+    // For click-no-drag.
+    const mousePosition = this._canvas.getMousePosition(e);
+    this._dragDistance += mousePosition.subtract(this._dragPosition).magnitude;
+    this._dragPosition = mousePosition;;
   }
   _dragEnd(e) {
     assertParameters(arguments, MouseEvent);
@@ -37,6 +49,11 @@ class InputHandler {
     if (!this._dragging) return;
     this._dragging = false;
     this._dispatchMouseEvent(e, InputHandler.EVENT_TYPES.DRAG_END);
+
+    // For click-no-drag.
+    if (this._dragDistance < InputHandler.CLICK_NO_DRAG_THRESHOLD) {
+      this._dispatchMouseEvent(e, InputHandler.EVENT_TYPES.CLICK_NO_DRAG);
+    }
   }
 
   _key(e) {
@@ -62,9 +79,11 @@ class InputHandler {
     assertParameters(arguments, MouseEvent, InputHandler.EVENT_TYPES);
 
     const mousePosition = this._canvas.getMousePosition(e);
-    Events.dispatch(eventType, mousePosition);
+    Events.dispatch(eventType, mousePosition, this._canvas);
   }
 }
+
+InputHandler.CLICK_NO_DRAG_THRESHOLD = 2;
 
 InputHandler.EVENT_TYPES = {
   DRAG_START: 'input-dragstart',
@@ -72,5 +91,6 @@ InputHandler.EVENT_TYPES = {
   DRAG_END: 'input-dragend',
   KEY: 'input-key',
   CLICK: 'input-click',
+  CLICK_NO_DRAG: 'input-clicknodrag',
   HOVER: 'input-hover'
 };

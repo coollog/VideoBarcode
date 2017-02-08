@@ -25,14 +25,29 @@ class FrameInterface {
   }
 
   _domInterfaceReady() {
+    assertParameters(arguments);
+
     Events.dispatch(FrameInterface.EVENT_TYPES.READY);
   }
 
+  _activatePolygon(polygonId) {
+    assertParameters(arguments, Number);
+
+    for (const polygon of Object.values(this._polygonInterfaces)) {
+      polygon.deactivate();
+    }
+
+    this._polygonInterfaces[polygonId].activate();
+  }
+
   _addPolygon() {
+    assertParameters(arguments);
+
     // Should prob change frame to 0.
     const polygonId = this._frameModel.addPolygon();
-    this._polygonInterfaces[polygonId] =
-        new PolygonInterface(this._frameModel, polygonId);
+    const newPolygon = new PolygonInterface(this._frameModel, polygonId);
+    this._polygonInterfaces[polygonId] = newPolygon;
+    this._activatePolygon(polygonId);
   }
 
   _draw() {
