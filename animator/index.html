@@ -26,6 +26,15 @@
     left: 0;
     top: auto;
   }
+  .headcol-interactive {
+    cursor: pointer;
+  }
+  .headcol-interactive:hover {
+    background: #eee;
+  }
+  .headcol-interactive.active {
+    background: #faa;
+  }
 
   #kf-wrapper td {
     vertical-align: middle;
@@ -68,6 +77,8 @@
 <script src="js/FrameModel.js"></script>
 <script src="js/PriorityQueue.js"></script>
 <script src="js/Events.js"></script>
+<script src="js/DOMInterfaceTablePolygonRow.js"></script>
+<script src="js/DOMInterfaceTable.js"></script>
 <script src="js/DOMInterface.js"></script>
 <script src="js/Canvas.js"></script>
 <script src="js/PolygonPointInterface.js"></script>
@@ -87,62 +98,4 @@
   new Controller();
 
   (new DrawTimer(canvas, FPS)).start();
-</script>
-
-<script>
-  const keyframes = 64;
-  const framesps = 16;
-
-  function kf_addRow(rowId, rowName, rowContents) {
-    let row = `<tr id="${rowId}"><td class="headcol">${rowName}</td>`;
-
-    for (let i = 0; i < keyframes; i ++) {
-      const content = rowContents[i];
-      row += `<td index=${i}>${content}</td>`;
-    }
-
-    row += `</tr>`;
-    $('#keyframes table').append(row);
-  }
-
-  function makeKeyframeNumbers() {
-    let kfs = new Array(keyframes);
-
-    for (let i = 0; i < keyframes; i ++) {
-      kfs[i] = i;
-    }
-
-    kf_addRow(`kf-num`, ``, kfs);
-  }
-
-  function makeKeyframes() {
-    let kfs = new Array(keyframes);
-
-    for (let i = 0; i < keyframes; i ++) {
-      kfs[i] = ``;
-    }
-
-    kf_addRow(`kf-sel`, `Goto frame`, kfs);
-  }
-
-  function activateKeyframes() {
-    const kfelems = '#kf-sel :not(:first-child)';
-
-    $(kfelems).click(function() {
-      const isSel = $(this).hasClass('sel');
-
-      if (isSel) {
-        $(this).removeClass('sel');
-      } else {
-        $(kfelems).removeClass('sel');
-        $(this).addClass('sel');
-      }
-    });
-  }
-
-  $(function() {
-    makeKeyframeNumbers();
-    makeKeyframes();
-    activateKeyframes();
-  });
 </script>

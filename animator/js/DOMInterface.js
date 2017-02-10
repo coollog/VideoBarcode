@@ -1,4 +1,5 @@
 // import 'Assert'
+// import 'DOMInterfaceTable'
 // import 'Events'
 // import 'jquery'
 
@@ -6,17 +7,27 @@
  * Sets up and controls the DOM user interface.
  */
 class DOMInterface {
-  constructor() {
+  constructor(frameModel) {
+    assertParameters(arguments, FrameModel);
+
+    this._frameModel = frameModel;
+
+    this._table = new DOMInterfaceTable();
+
     $(() => {
       this._activateButtons();
+
+      this._table.activate();
 
       Events.dispatch(DOMInterface.EVENT_TYPES.READY);
     });
   }
 
   _activateButtons() {
-    $('#but-add-polygon').click(function() {
-      Events.dispatch(DOMInterface.EVENT_TYPES.ADD_POLYGON);
+    assertParameters(arguments);
+
+    $('#but-add-polygon').click(() => {
+      this._frameModel.addPolygon();
     });
   }
 };

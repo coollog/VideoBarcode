@@ -37,12 +37,14 @@ class FrameModel {
     const id = FrameModel._nextPolygonId ++;
     this._polygons[id] = poly;
 
+    Events.dispatch(FrameModel.EVENT_TYPES.ADD_POLYGON, id);
+
     return id;
   }
 };
 
-FrameModel._KEYFRAMES = 64;
-FrameModel._FPS = 16;
+FrameModel.KEYFRAMES = 64;
+FrameModel.FPS = 16;
 FrameModel._DEFAULT_POLYGON = [
   new Coordinate(108, 108),
   new Coordinate(148, 108),
@@ -51,3 +53,7 @@ FrameModel._DEFAULT_POLYGON = [
 ];
 
 FrameModel._nextPolygonId = 0;
+
+FrameModel.EVENT_TYPES = {
+  ADD_POLYGON: 'framemodel-addpolygon'
+};
