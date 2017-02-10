@@ -67,6 +67,7 @@ function assertParameters(params, ...types) {
   function matches(param, type) {
     if (type === undefined) return true;
     if (param === undefined) return false;
+    if (type === null) return param === null;
 
     if (type.constructor === Object) {
       for (let key in type) {

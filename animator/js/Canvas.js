@@ -171,6 +171,13 @@ class Canvas {
     this._updateCursor();
   }
 
+  removeCursorFor(owner) {
+    assertParameters(arguments, Object);
+
+    this._cursorMap.delete(owner);
+    this._updateCursor();
+  }
+
   // Updates the cursor with the highest priority from the cursor map.
   _updateCursor() {
     let topPriority = 0;

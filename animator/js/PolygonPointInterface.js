@@ -23,6 +23,7 @@ class PolygonPointInterface {
     Events.on(InputHandler.EVENT_TYPES.DRAG_START, this._onDragStart, this);
     Events.on(InputHandler.EVENT_TYPES.DRAG, this._onDrag, this);
     Events.on(InputHandler.EVENT_TYPES.DRAG_END, this._onDragEnd, this);
+    Events.on(InputHandler.EVENT_TYPES.KEY, this._onKey, this);
 
     Events.on(PolygonPointInterface.EVENT_TYPES.DRAGGING,
         this._anotherDragging, this);
@@ -33,11 +34,19 @@ class PolygonPointInterface {
   destroy() {
     assertParameters(arguments);
 
+    if (this._dragging) {
+      Events.dispatch(PolygonPointInterface.EVENT_TYPES.DRAG_END, this);
+    }
+    canvas.removeCursorFor(this);
+
     Events.off(DrawTimer.EVENT_TYPES.DRAW, this);
     Events.off(InputHandler.EVENT_TYPES.HOVER, this);
     Events.off(InputHandler.EVENT_TYPES.DRAG_START, this);
     Events.off(InputHandler.EVENT_TYPES.DRAG, this);
     Events.off(InputHandler.EVENT_TYPES.DRAG_END, this);
+    Events.off(InputHandler.EVENT_TYPES.KEY, this);
+    Events.off(PolygonPointInterface.EVENT_TYPES.DRAGGING, this);
+    Events.off(PolygonPointInterface.EVENT_TYPES.DRAG_END, this);
   }
 
   _scaledCoord(canvas) {
@@ -101,6 +110,17 @@ class PolygonPointInterface {
 
     this._dragging = false;
     Events.dispatch(PolygonPointInterface.EVENT_TYPES.DRAG_END, this);
+  }
+
+  _onKey(keyChar) {
+    assertParameters(arguments, String);
+
+    if (!this._hover) return;
+
+    if (keyChar === 'D') {
+      this._point.remove();
+      this.destroy();
+    }
   }
 
   _draw(canvas) {

@@ -3,6 +3,8 @@
 
 /**
  * Represents a polygon.
+ * TODO: addPoint does not always add between two closest points. Probably
+ *       need to make linked list circular.
  */
 class PolygonModel {
   constructor() {
@@ -50,7 +52,7 @@ class PolygonModel {
   addPoint(coord) {
     assertParameters(arguments, Coordinate);
 
-    const newPoint = new PolygonModel.Point(coord);
+    const newPoint = new PolygonModel.Point(this, coord);
 
     if (this._firstPoint === null) {
       this._firstPoint = newPoint;
@@ -113,15 +115,34 @@ class PolygonModel {
 
     return newPoint;
   }
+
+  removePoint(point) {
+    assertParameters(arguments, PolygonModel.Point);
+
+    if (point.prev !== null) {
+      point.prev.next = point.next;
+      console.log('setting prev to next');
+    } else if (point.next !== null) {
+      point.next.prev = point.prev;
+      console.log('setting next to prev');
+    }
+
+    if (point === this._firstPoint) {
+      this._firstPoint = point.next;
+    }
+
+    console.log(...this.points);
+  }
 };
 
 /**
  * Represents a point in the polygon in a linked-list manner.
  */
 PolygonModel.Point = class {
-  constructor(coord) {
-    assertParameters(arguments, Coordinate);
+  constructor(polygon, coord) {
+    assertParameters(arguments, PolygonModel, Coordinate);
 
+    this._polygon = polygon;
     this._coord = coord;
 
     this._nextPoint = null;
@@ -141,20 +162,20 @@ PolygonModel.Point = class {
     return this._nextPoint;
   }
   set next(next) {
-    assertParameters(arguments, PolygonModel.Point);
+    assertParameters(arguments, [PolygonModel.Point, null]);
 
     this._nextPoint = next;
-    next.prevPoint = this;
+    if (next !== null) next.prevPoint = this;
   }
 
   get prev() {
     return this._prevPoint;
   }
   set prev(prev) {
-    assertParameters(arguments, PolygonModel.Point);
+    assertParameters(arguments, [PolygonModel.Point, null]);
 
     this._prevPoint = prev;
-    prev.nextPoint = this;
+    if (prev !== null) prev.nextPoint = this;
   }
 
   set prevPoint(other) {
@@ -193,5 +214,11 @@ PolygonModel.Point = class {
 
     if (this._prevPoint !== null) this._prevPoint.next = pt;
     this.prev = pt;
+  }
+
+  remove() {
+    assertParameters(arguments);
+
+    this._polygon.removePoint(this);
   }
 };
