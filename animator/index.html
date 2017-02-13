@@ -1,4 +1,38 @@
 <style>
+  @import url('https://fonts.googleapis.com/css?family=Ubuntu|Ubuntu+Mono');
+
+  html, body {
+    height: 100%;
+    font-family: 'Ubuntu', sans-serif;
+  }
+  * {
+    margin: 0;
+    box-sizing: border-box;
+  }
+  input, button {
+    font-family: 'Ubuntu Mono', monospace;
+    transition: 0.1s all ease-in-out;
+    font-size: 1em;
+    outline: none;
+  }
+  input {
+    border: 1px solid #ccc;
+  }
+  button {
+    padding: 0.5em 1em;
+    background: #fc0;
+    box-shadow: 0 0 10px #999;
+    border: none;
+    cursor: pointer;
+  }
+  button:hover {
+    opacity: 0.5;
+  }
+  button:active {
+    box-shadow: 0 0 5px #222;
+    opacity: 1;
+  }
+
   #canvas {
     border: 1px solid black;
     outline: none;
@@ -44,8 +78,15 @@
     text-align: center;
     transition: 0.1s all ease-in-out;
   }
+  #kf-wrapper td:first-child {
+    padding: 0.25em;
+  }
   #kf-wrapper td+td {
     height: 1.5em;
+  }
+
+  #kf-num td:not(:first-child) {
+    font-size: 0.8em;
   }
 
   .keyframe-row td:not(:first-child) {
@@ -60,7 +101,7 @@
   }
 
   #kf-sel td:not(:first-child) {
-    min-width: 15px;
+    min-width: 20px;
     background: #c88;
     cursor: pointer;
   }
