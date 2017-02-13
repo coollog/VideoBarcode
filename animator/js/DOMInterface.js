@@ -12,7 +12,7 @@ class DOMInterface {
 
     this._frameModel = frameModel;
 
-    this._table = new DOMInterfaceTable();
+    this._table = new DOMInterfaceTable(frameModel);
 
     $(() => {
       this._activateButtons();

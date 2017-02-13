@@ -13,7 +13,7 @@
   }
   #kf-wrapper {
     overflow-x: scroll;
-    margin-left: 5em;
+    margin-left: 10em;
     max-width: 100%;
     padding-bottom: 1em;
   }
@@ -22,7 +22,7 @@
   }
   .headcol {
     position: absolute;
-    width: 5em;
+    width: 10em;
     left: 0;
     top: auto;
   }
@@ -35,25 +35,39 @@
   .headcol-interactive.active {
     background: #faa;
   }
+  .kf-polyposition input {
+    width: 2em;
+  }
 
   #kf-wrapper td {
     vertical-align: middle;
     text-align: center;
+    transition: 0.1s all ease-in-out;
   }
   #kf-wrapper td+td {
     height: 1.5em;
   }
 
-  #kf-sel :not(:first-child) {
+  .keyframe-row td:not(:first-child) {
+    background: #f3f3f3;
+    cursor: pointer;
+  }
+  .keyframe-row td:not(:first-child):hover {
+    background: #ff0 !important;
+  }
+  .keyframe-row td:not(:first-child).current {
+    background: #fdd;
+  }
+
+  #kf-sel td:not(:first-child) {
     min-width: 15px;
     background: #c88;
     cursor: pointer;
-    transition: 0.1s all ease-in-out;
   }
-  #kf-sel :not(:first-child):hover {
+  #kf-sel td:not(:first-child):hover {
     background: #e00;
   }
-  #kf-sel :not(:first-child).sel {
+  #kf-sel td:not(:first-child).sel {
     background: #e00;
   }
 </style>
@@ -77,7 +91,11 @@
 <script src="js/FrameModel.js"></script>
 <script src="js/PriorityQueue.js"></script>
 <script src="js/Events.js"></script>
+<script src="js/DOMInterfaceTableRow.js"></script>
+<script src="js/DOMInterfaceTableKeyframeRow.js"></script>
+<script src="js/DOMInterfaceTableGotoRow.js"></script>
 <script src="js/DOMInterfaceTablePolygonRow.js"></script>
+<script src="js/DOMInterfaceTablePolygonPositionRow.js"></script>
 <script src="js/DOMInterfaceTable.js"></script>
 <script src="js/DOMInterface.js"></script>
 <script src="js/Canvas.js"></script>

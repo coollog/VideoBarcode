@@ -67,8 +67,9 @@ class PolygonInterface {
 
     let scaledCoords = [];
     for (const coord of this._polygon.coords) {
-      scaledCoords.push(
-          PolygonInterface._scaleCoord(coord, canvas.width, canvas.height));
+      const positionedCoord = coord.translate(this._polygon.position);
+      scaledCoords.push(PolygonInterface._scaleCoord(
+          positionedCoord, canvas.width, canvas.height));
     }
     return scaledCoords;
   }

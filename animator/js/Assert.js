@@ -10,6 +10,10 @@ function assertType(variable, type) {
   }
 }
 
+function assertUnimplemented() {
+  assert(false, 'fatal error: unimplemented function');
+}
+
 // Checks the parameters to see if it matches the types.
 // Usage example:
 //  assertParameters(

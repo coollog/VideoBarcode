@@ -11,6 +11,17 @@ class PolygonModel {
     assertParameters(arguments);
 
     this._firstPoint = null;
+
+    this._position = new Coordinate(0, 0);
+  }
+
+  get position() {
+    return this._position;
+  }
+  set position(coord) {
+    assertParameters(arguments, Coordinate);
+
+    this._position = coord;
   }
 
   get coords() {

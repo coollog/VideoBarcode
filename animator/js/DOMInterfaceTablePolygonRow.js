@@ -1,4 +1,5 @@
 // import 'Assert'
+// import 'DOMInterfaceTableKeyframeRow'
 // import 'Events'
 // import 'FrameModel'
 // import 'jquery'
@@ -6,60 +7,30 @@
 /**
  * Sets up and controls a row for a polygon.
  */
-class DOMInterfaceTablePolygonRow {
+class DOMInterfaceTablePolygonRow extends DOMInterfaceTableKeyframeRow {
   constructor(polygonId, rowId, active = true) {
     assertParameters(arguments, Number, String, [Boolean, undefined]);
 
-    this._polygonId = polygonId;
-    this._rowId = rowId;
-    this._active = active;
+    super(polygonId, rowId, active);
 
-    Events.on(DOMInterfaceTablePolygonRow.EVENT_TYPES.DEACTIVATE_ALL,
-        this._deactivate, this);
-
-    this._setupDOM();
+    this.activate();
   }
 
-  _setupDOM() {
+  // _clickFrame(e) {
+  //   assertParameters(arguments, $.Event);
+
+  //   const cells = e.data;
+
+  // }
+
+  _dispatchActivateEvent() {
     assertParameters(arguments);
 
-    $(`#${this._rowId} .headcol`)
-      .addClass(`headcol-interactive`)
-      .click(this._toggle.bind(this));
-
-    this._updateActive();
-  }
-
-  _toggle() {
-    const active = this._active;
-
-    Events.dispatch(DOMInterfaceTablePolygonRow.EVENT_TYPES.DEACTIVATE_ALL);
-    if (active) return;
-
-    this._activate();
     Events.dispatch(DOMInterfaceTablePolygonRow.EVENT_TYPES.ACTIVATE,
         this._polygonId);
-  }
-
-  _updateActive() {
-    const headCol = $(`#${this._rowId} .headcol`);
-
-    if (this._active) headCol.addClass(`active`);
-    else headCol.removeClass(`active`);
-  }
-
-  _activate() {
-    this._active = true;
-    this._updateActive();
-  }
-
-  _deactivate() {
-    this._active = false;
-    this._updateActive();
   }
 };
 
 DOMInterfaceTablePolygonRow.EVENT_TYPES = {
-  ACTIVATE: 'domiftblpolyrow-activate',
-  DEACTIVATE_ALL: 'domiftblpolyrow-deactivate'
+  ACTIVATE: 'domiftblpolyrow-activate'
 };

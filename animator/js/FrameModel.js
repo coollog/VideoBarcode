@@ -10,8 +10,28 @@ class FrameModel {
   constructor() {
     assertParameters(arguments);
 
+    // Map from id to PolygonModel.
     this._polygons = {};
     this._currentFrame = 0;
+
+    this._frames = (new Array(FrameModel.KEYFRAMES)).fill().map(
+        (x, i) => new FrameModel.Frame(this, i));
+  }
+
+  get currentFrameIndex() {
+    return this._currentFrame;
+  }
+
+  // Gets the current FrameModel.Frame.
+  get currentFrame() {
+    return this._frames[this._currentFrame];
+  }
+  set currentFrame(frameIndex) {
+    assertParameters(arguments, Number);
+
+    this._currentFrame = frameIndex;
+
+    Events.dispatch(FrameModel.EVENT_TYPES.CHANGE_FRAME, frameIndex);
   }
 
   get polygons() {
@@ -43,6 +63,60 @@ class FrameModel {
   }
 };
 
+/**
+ * Represents a single frame for every polygon.
+ */
+FrameModel.Frame = class {
+  constructor(frameModel, frameIndex) {
+    assertParameters(arguments, FrameModel, Number);
+
+    this._frameModel = frameModel;
+    this._frameIndex = frameIndex;
+
+    // Map from id to FrameModel.Frame.PositionKeyFrame.
+    this._positionKeyFrames = {};
+  }
+
+  addKeyFrame(polygonId) {
+    assertParameters(arguments, Number);
+
+    if (polygonId in this._positionKeyFrames) return;
+
+    this.addPositionKeyFrame(polygonId);
+  }
+
+  removeKeyFrame(polygonId) {
+    assertParameters(arguments, Number);
+
+    this.removePositionKeyFrame(polygonId);
+  }
+
+  addPositionKeyFrame(polygonId) {
+    assertParameters(arguments, Number);
+
+    this._frameModel.currentFrame = this._frameIndex;
+    this._positionKeyFrames[polygonId] = new FrameModel.Frame.PositionKeyFrame(
+        this._frameModel.getPolygonPosition(polygonId));
+  }
+
+  removePositionKeyFrame(polygonId) {
+    assertParameters(arguments, Number);
+
+    delete this._positionKeyFrames[polygonId];
+  }
+};
+
+/**
+ * Represents a single keyframe for a polygon.
+ */
+FrameModel.Frame.PositionKeyFrame = class {
+  constructor(coord) {
+    assertParameters(arguments, Coordinate);
+
+    this._position = coord;
+  }
+};
+
 FrameModel.KEYFRAMES = 64;
 FrameModel.FPS = 16;
 FrameModel._DEFAULT_POLYGON = [
@@ -55,5 +129,6 @@ FrameModel._DEFAULT_POLYGON = [
 FrameModel._nextPolygonId = 0;
 
 FrameModel.EVENT_TYPES = {
-  ADD_POLYGON: 'framemodel-addpolygon'
+  ADD_POLYGON: 'framemodel-addpolygon',
+  CHANGE_FRAME: 'framemodel-changeframe'
 };

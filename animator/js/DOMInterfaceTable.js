@@ -1,26 +1,48 @@
 // import 'Assert'
 // import 'DOMInterfaceTablePolygonRow'
+// import 'DOMInterfaceTablePolygonPositionRow'
 // import 'Events'
 // import 'FrameModel'
 // import 'jquery'
 
 /**
  * Sets up and controls the frame table interface.
+ * TODO: Refactor all the inline DOM selectors.
  */
 class DOMInterfaceTable {
-  constructor() {
-    assertParameters(arguments);
+  constructor(frameModel) {
+    assertParameters(arguments, FrameModel);
+
+    this._frameModel = frameModel;
+
+    this._gotoRow = null;
+    // Map from id to DOMInterfaceTablePolygonRow.
+    this._polygonRows = {};
+    // Map from id to DOMInterfaceTablePolygonPositionRow.
+    this._polygonPositionRows = {};
 
     this._addFrameNumbersRow();
     this._addGotoFrameRow();
 
     Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON, this._addPolygonRow, this);
+    Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON,
+        this._addPolygonPositionRow, this);
+    Events.on(FrameModel.EVENT_TYPES.CHANGE_FRAME, this._changeFrame, this);
   }
 
-  static _addRow(rowId, rowName, cellContentFn) {
-    assertParameters(arguments, String, String, Function);
+  activate() {
+    assertParameters(arguments);
 
-    let row = `<tr id="${rowId}"><td class="headcol">${rowName}</td>`;
+    this._gotoRow.activate();
+  }
+
+  _addRow(rowId, rowClass, rowName, headcolClass, cellContentFn) {
+    assertParameters(arguments, String, String, String, String, Function);
+
+    let row = `
+      <tr id="${rowId}" class="${rowClass}">
+      <td class="headcol ${headcolClass}">${rowName}</td>
+    `;
 
     for (let i = 0; i < FrameModel.KEYFRAMES; i ++) {
       const content = cellContentFn(i);
@@ -31,47 +53,70 @@ class DOMInterfaceTable {
     $('#keyframes table').append(row);
   }
 
-  activate() {
-    assertParameters(arguments);
-
-    this._activateGotoFrames();
-  }
-
   _addPolygonRow(polygonId) {
     assertParameters(arguments, Number);
 
     const rowId = `kf-poly${polygonId}`;
-    DOMInterfaceTable._addRow(rowId, `Polygon ${polygonId}`, (i) => i);
+    const rowContent = DOMInterfaceTable.POLYGON_ROW_CONTENT(polygonId);
+    this._addRow(rowId, `keyframe-row`, rowContent, `kf-poly`, (i) => ``);
 
-    new DOMInterfaceTablePolygonRow(polygonId, rowId);
+    const newPolygonRow = new DOMInterfaceTablePolygonRow(polygonId, rowId);
+    newPolygonRow.currentFrame = this._frameModel.currentFrameIndex;
+    this._polygonRows[polygonId] = newPolygonRow;
+  }
+
+  _addPolygonPositionRow(polygonId) {
+    assertParameters(arguments, Number);
+
+    const rowId = `kf-polyposition${polygonId}`;
+    const rowContent = DOMInterfaceTable.POLYGON_POSITION_ROW_CONTENT(
+        this._frameModel.getPolygon(polygonId).position);
+    this._addRow(
+        rowId, `keyframe-row`, rowContent, `kf-polyposition`, (i) => ``);
+
+    const newPolygonPositionRow =
+        new DOMInterfaceTablePolygonPositionRow(polygonId, rowId, false);
+    newPolygonPositionRow.currentFrame = this._frameModel.currentFrameIndex;
+    this._polygonPositionRows[polygonId] = newPolygonPositionRow;
   }
 
   _addFrameNumbersRow() {
     assertParameters(arguments);
 
-    DOMInterfaceTable._addRow(`kf-num`, ``, (i) => i);
+    this._addRow(`kf-num`, ``, ``, ``, (i) => i);
   }
 
   _addGotoFrameRow() {
     assertParameters(arguments);
 
-    DOMInterfaceTable._addRow(`kf-sel`, `Goto frame`, (i) => ``);
+    const rowId = `kf-sel`;
+    this._addRow(rowId, ``, `Goto frame`, ``, (i) => ``);
+
+    this._gotoRow = new DOMInterfaceTableGotoRow(rowId);
   }
 
-  _activateGotoFrames() {
-    assertParameters(arguments);
+  _changeFrame(frameIndex) {
+    assertParameters(arguments, Number);
 
-    const kfelems = '#kf-sel :not(:first-child)';
+    for (const polygonRow of Object.values(this._polygonRows)) {
+      polygonRow.currentFrame = frameIndex;
+    }
 
-    $(kfelems).click(function() {
-      const isSel = $(this).hasClass('sel');
-
-      if (isSel) {
-        $(this).removeClass('sel');
-      } else {
-        $(kfelems).removeClass('sel');
-        $(this).addClass('sel');
-      }
-    });
+    for (const positionRow of Object.values(this._polygonPositionRows)) {
+      positionRow.currentFrame = frameIndex;
+    }
   }
+};
+
+DOMInterfaceTable.POLYGON_ROW_CONTENT = function(polygonId) {
+  return `Polygon ${polygonId}`;
+};
+
+DOMInterfaceTable.POLYGON_POSITION_ROW_CONTENT = function(coord) {
+  const x = coord.x;
+  const y = coord.y;
+  return `
+    x <input type="x" value="${x}"></input> &nbsp;
+    y <input type="y" value="${y}"></input>
+  `;
 };

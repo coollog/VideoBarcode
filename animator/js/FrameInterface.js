@@ -1,6 +1,9 @@
 // import 'Assert'
 // import 'Controller'
 // import 'DOMInterface'
+// import 'DOMInterfaceTablePolygonPositionRow'
+// import 'DOMInterfaceTablePolygonRow'
+// import 'DOMInterfaceTableRow'
 // import 'FrameModel'
 // import 'PolygonInterface'
 
@@ -19,11 +22,15 @@ class FrameInterface {
 
     // Attach event listeners.
     Events.on(DOMInterface.EVENT_TYPES.READY, this._domInterfaceReady, this);
+    Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON, this._addPolygon, this);
+
+    Events.on(DOMInterfaceTableGotoRow.EVENT_TYPES.GOTO, this._gotoFrame, this);
     Events.on(DOMInterfaceTablePolygonRow.EVENT_TYPES.ACTIVATE,
         this._activatePolygon, this);
-    Events.on(DOMInterfaceTablePolygonRow.EVENT_TYPES.DEACTIVATE_ALL,
+    Events.on(DOMInterfaceTableKeyframeRow.EVENT_TYPES.DEACTIVATE_ALL,
         this._deactivatePolygons, this);
-    Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON, this._addPolygon, this);
+    Events.on(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.CHANGE,
+        this._polygonPositionChanged, this);
 
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._draw, this);
   }
@@ -34,8 +41,17 @@ class FrameInterface {
     Events.dispatch(FrameInterface.EVENT_TYPES.READY);
   }
 
+  _gotoFrame(frameIndex) {
+    assertParameters(arguments, Number);
+
+    this._frameModel.currentFrame = frameIndex;
+  }
+
   _activatePolygon(polygonId) {
     assertParameters(arguments, Number);
+
+    // Don't activate the polygon if it hasn't been added to the interfaces yet.
+    if (!(polygonId in this._polygonInterfaces)) return;
 
     this._deactivatePolygons();
     this._polygonInterfaces[polygonId].activate();
@@ -56,6 +72,12 @@ class FrameInterface {
     const newPolygon = new PolygonInterface(this._frameModel, polygonId);
     this._polygonInterfaces[polygonId] = newPolygon;
     this._activatePolygon(polygonId);
+  }
+
+  _polygonPositionChanged(polygonId, newPosition) {
+    assertParameters(arguments, Number, Coordinate);
+
+    this._frameModel.getPolygon(polygonId).position = newPosition;
   }
 
   _draw() {
