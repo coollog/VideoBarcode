@@ -16,6 +16,13 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
     this.activate();
   }
 
+  changePosition(coord) {
+    assertParameters(arguments, Coordinate);
+
+    this._inputX.val(Math.round(coord.x));
+    this._inputY.val(Math.round(coord.y));
+  }
+
   get _inputX() {
     return this._headColElem.children('input[type=x]');
   }

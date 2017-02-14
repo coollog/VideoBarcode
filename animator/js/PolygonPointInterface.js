@@ -127,16 +127,23 @@ class PolygonPointInterface {
     assertParameters(arguments, Canvas);
 
     if (this._hover) {
-      canvas.drawCircle(this._scaledCoord(canvas), 10, 'black', true);
+      canvas.drawCircle(
+          this._scaledCoord(canvas),
+          10,
+          PolygonPointInterface._HOVER_COLOR,
+          true);
       canvas.setCursorFor(this, Canvas.CURSOR_TYPE.MOVE, 100);
     } else {
       canvas.setCursorFor(this, Canvas.CURSOR_TYPE.DEFAULT, 0);
     }
 
-    canvas.drawCircle(this._scaledCoord(canvas), 5, 'red');
+    canvas.drawCircle(
+        this._scaledCoord(canvas), 5, PolygonPointInterface._DOT_COLOR);
   }
 };
 
+PolygonPointInterface._DOT_COLOR = COLORS.POLYGON_INTERFACE_ACTIVE;
+PolygonPointInterface._HOVER_COLOR = COLORS.POLYGON_POINT_INTERFACE_HOVER;
 PolygonPointInterface._HOVER_RADIUS = 10;
 
 PolygonPointInterface.EVENT_TYPES = {

@@ -1,14 +1,18 @@
 // import 'Assert'
 // import 'Coordinate'
+// import 'Events'
 
 /**
  * Represents a polygon.
  * TODO: addPoint does not always add between two closest points. Probably
  *       need to make linked list circular.
+ *       Should prob calculate nearest MIDPOINT on EDGE.
  */
 class PolygonModel {
-  constructor() {
-    assertParameters(arguments);
+  constructor(id) {
+    assertParameters(arguments, Number);
+
+    this._id = id;
 
     this._firstPoint = null;
 
@@ -22,6 +26,8 @@ class PolygonModel {
     assertParameters(arguments, Coordinate);
 
     this._position = coord;
+
+    Events.dispatch(PolygonModel.EVENT_TYPES.CHANGE_POSITION, this._id);
   }
 
   get coords() {
@@ -232,4 +238,8 @@ PolygonModel.Point = class {
 
     this._polygon.removePoint(this);
   }
+};
+
+PolygonModel.EVENT_TYPES = {
+  CHANGE_POSITION: 'polymodel-position'
 };

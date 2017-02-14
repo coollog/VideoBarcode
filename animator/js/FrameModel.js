@@ -48,13 +48,13 @@ class FrameModel {
   addPolygon() {
     assertParameters(arguments);
 
-    const poly = new PolygonModel();
+    const id = FrameModel._nextPolygonId ++;
+    const poly = new PolygonModel(id);
 
     for (const coord of FrameModel._DEFAULT_POLYGON) {
       poly.addPoint(coord);
     }
 
-    const id = FrameModel._nextPolygonId ++;
     this._polygons[id] = poly;
 
     Events.dispatch(FrameModel.EVENT_TYPES.ADD_POLYGON, id);
@@ -130,5 +130,5 @@ FrameModel._nextPolygonId = 0;
 
 FrameModel.EVENT_TYPES = {
   ADD_POLYGON: 'framemodel-addpolygon',
-  CHANGE_FRAME: 'framemodel-changeframe'
+  CHANGE_FRAME: 'framemodel-changeframe',
 };

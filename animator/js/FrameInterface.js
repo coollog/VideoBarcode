@@ -26,9 +26,13 @@ class FrameInterface {
 
     Events.on(DOMInterfaceTableGotoRow.EVENT_TYPES.GOTO, this._gotoFrame, this);
     Events.on(DOMInterfaceTablePolygonRow.EVENT_TYPES.ACTIVATE,
-        this._activatePolygon, this);
+        this._startEditingPolygon, this);
+
     Events.on(DOMInterfaceTableKeyframeRow.EVENT_TYPES.DEACTIVATE_ALL,
         this._deactivatePolygons, this);
+
+    Events.on(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.ACTIVATE,
+        this._startMovingPolygon, this);
     Events.on(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.CHANGE,
         this._polygonPositionChanged, this);
 
@@ -47,14 +51,20 @@ class FrameInterface {
     this._frameModel.currentFrame = frameIndex;
   }
 
-  _activatePolygon(polygonId) {
+  _startEditingPolygon(polygonId) {
     assertParameters(arguments, Number);
 
-    // Don't activate the polygon if it hasn't been added to the interfaces yet.
+    // Don't start editing the polygon if it hasn't been added to the interfaces
+    // yet.
     if (!(polygonId in this._polygonInterfaces)) return;
 
-    this._deactivatePolygons();
-    this._polygonInterfaces[polygonId].activate();
+    this._polygonInterfaces[polygonId].startEditing();
+  }
+
+  _startMovingPolygon(polygonId) {
+    assertParameters(arguments, Number);
+
+    this._polygonInterfaces[polygonId].startMoving();
   }
 
   _deactivatePolygons() {
@@ -71,7 +81,7 @@ class FrameInterface {
     // Should prob change frame to 0.
     const newPolygon = new PolygonInterface(this._frameModel, polygonId);
     this._polygonInterfaces[polygonId] = newPolygon;
-    this._activatePolygon(polygonId);
+    this._startEditingPolygon(polygonId);
   }
 
   _polygonPositionChanged(polygonId, newPosition) {

@@ -28,6 +28,9 @@ class DOMInterfaceTable {
     Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON,
         this._addPolygonPositionRow, this);
     Events.on(FrameModel.EVENT_TYPES.CHANGE_FRAME, this._changeFrame, this);
+
+    Events.on(PolygonModel.EVENT_TYPES.CHANGE_POSITION,
+        this._changePolygonPosition, this)
   }
 
   activate() {
@@ -105,6 +108,13 @@ class DOMInterfaceTable {
     for (const positionRow of Object.values(this._polygonPositionRows)) {
       positionRow.currentFrame = frameIndex;
     }
+  }
+
+  _changePolygonPosition(polygonId) {
+    assertParameters(arguments, Number);
+
+    const position = this._frameModel.getPolygon(polygonId).position;
+    this._polygonPositionRows[polygonId].changePosition(position);
   }
 };
 

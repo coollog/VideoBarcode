@@ -1,5 +1,6 @@
 // import 'Assert'
 // import 'Canvas'
+// import 'Colors'
 // import 'Coordinate'
 // import 'FrameModel'
 // import 'PolygonModel'
@@ -17,9 +18,16 @@ class PolygonInterface {
     this._polygon = this._frameModel.getPolygon(polygonId);
 
     this._pointInterfaces = new Set();
-    this._activated = false;
+
+    this._state = PolygonInterface._STATES.IDLE;
+
+    this._dragging = false;
+    this._dragLast = null;
 
     Events.on(InputHandler.EVENT_TYPES.CLICK_NO_DRAG, this._onClick, this);
+    Events.on(InputHandler.EVENT_TYPES.DRAG_START, this._onDragStart, this);
+    Events.on(InputHandler.EVENT_TYPES.DRAG, this._onDrag, this);
+    Events.on(InputHandler.EVENT_TYPES.DRAG_END, this._onDragEnd, this);
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._draw, this);
   }
 
@@ -43,23 +51,45 @@ class PolygonInterface {
     return coord;
   }
 
-  activate() {
+  static _inverseScaleCoordCanvas(coord, canvas) {
+    return PolygonInterface._inverseScaleCoord(
+        PolygonInterface._AREA_SIZE,
+        coord,
+        canvas.width,
+        canvas.height);
+  }
+
+  startEditing() {
     assertParameters(arguments);
 
     for (const point of this._polygon.points) {
       this._addPointInterface(point);
     }
-    this._activated = true;
+    this._state = PolygonInterface._STATES.EDITING;
+  }
+
+  startMoving() {
+    assertParameters(arguments);
+
+    canvas.setCursorFor(this, Canvas.CURSOR_TYPE.MOVE, 100);
+
+    this._state = PolygonInterface._STATES.MOVING;
   }
 
   deactivate() {
     assertParameters(arguments);
 
+    // Clear editing.
     for (const pointInterface of this._pointInterfaces) {
       pointInterface.destroy();
     }
     this._pointInterfaces.clear();
-    this._activated = false;
+
+    // Clear moving.
+    canvas.removeCursorFor(this);
+    this._dragging = false;
+
+    this._state = PolygonInterface._STATES.IDLE;
   }
 
   get _scaledCoords() {
@@ -72,6 +102,16 @@ class PolygonInterface {
           positionedCoord, canvas.width, canvas.height));
     }
     return scaledCoords;
+  }
+
+  get _isIdle() {
+    return this._state === PolygonInterface._STATES.IDLE;
+  }
+  get _isEditing() {
+    return this._state === PolygonInterface._STATES.EDITING;
+  }
+  get _isMoving() {
+    return this._state === PolygonInterface._STATES.MOVING;
   }
 
   _addPointInterface(point) {
@@ -88,23 +128,61 @@ class PolygonInterface {
   _onClick(mousePosition, canvas) {
     assertParameters(arguments, Coordinate, Canvas);
 
-    if (!this._activated) return;
+    if (!this._isEditing) return;
 
     // Add a new point.
-    const inverseScaledCoord = PolygonInterface._inverseScaleCoord(
-        PolygonInterface._AREA_SIZE,
-        mousePosition,
-        canvas.width,
-        canvas.height);
+    const inverseScaledCoord = PolygonInterface._inverseScaleCoordCanvas(
+        mousePosition, canvas);
     const newPoint = this._polygon.addPoint(inverseScaledCoord);
     this._addPointInterface(newPoint);
+  }
+
+  _onDragStart(mousePosition, canvas) {
+    assertParameters(arguments, Coordinate, Canvas);
+
+    if (!this._isMoving) return;
+
+    this._dragging = true;
+    const inverseScaledCoord = PolygonInterface._inverseScaleCoordCanvas(
+        mousePosition, canvas);
+    this._dragLast = inverseScaledCoord;
+  }
+
+  _onDrag(mousePosition, canvas) {
+    assertParameters(arguments, Coordinate, Canvas);
+
+    if (!this._dragging) return;
+
+    const inverseScaledCoord = PolygonInterface._inverseScaleCoordCanvas(
+        mousePosition, canvas);
+    const dragDelta = inverseScaledCoord.subtract(this._dragLast);
+    this._dragLast = inverseScaledCoord;
+
+    const newPosition = this._polygon.position.translate(dragDelta);
+    this._polygon.position = newPosition;
+  }
+
+  _onDragEnd() {
+    assertParameters(arguments, Coordinate, Canvas);
+
+    if (!this._dragging) return;
+
+    this._dragging = false;
   }
 
   _draw(canvas) {
     assertParameters(arguments, Canvas);
 
-    canvas.drawPolygon(this._scaledCoords, 'red', true);
+    const color = this._isIdle ?
+        COLORS.POLYGON_INTERFACE_IDLE : COLORS.POLYGON_INTERFACE_ACTIVE;
+    canvas.drawPolygon(this._scaledCoords, color, true);
   }
 };
 
 PolygonInterface._AREA_SIZE = 256;
+
+PolygonInterface._STATES = {
+  IDLE: 0,
+  EDITING: 1,
+  MOVING: 2
+};
