@@ -7,9 +7,11 @@
  * User interface to edit a polygon corner.
  */
 class PolygonPointInterface {
-  constructor(point, scaleFn, inverseScaleFn) {
-    assertParameters(arguments, PolygonModel.Point, Function, Function);
+  constructor(polygon, point, scaleFn, inverseScaleFn) {
+    assertParameters(arguments,
+        PolygonModel, PolygonModel.Point, Function, Function);
 
+    this._polygon = polygon;
     this._point = point;
     this._hover = false;
     this._scaleCoord = scaleFn;
@@ -52,7 +54,8 @@ class PolygonPointInterface {
   _scaledCoord(canvas) {
     assertParameters(arguments, Canvas);
 
-    return this._scaleCoord(this._point.coord, canvas.width, canvas.height);
+    const positionedCoord = this._point.coord.translate(this._polygon.position);
+    return this._scaleCoord(positionedCoord, canvas.width, canvas.height);
   }
 
   _onHover(mousePosition, canvas) {
@@ -100,7 +103,7 @@ class PolygonPointInterface {
     const inverseScaledCoord =
         this._inverseScaleCoord(coord, canvas.width, canvas.height);
 
-    this._point.coord = inverseScaledCoord;
+    this._point.coord = inverseScaledCoord.subtract(this._polygon.position);
   }
 
   _onDragEnd(mousePosition, canvas) {

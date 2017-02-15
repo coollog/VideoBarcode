@@ -11,23 +11,15 @@ class DOMInterfaceTableGotoRow extends DOMInterfaceTableRow {
     super(rowId);
   }
 
-  _clickFrame(e) {
-    assertParameters(arguments, $.Event);
-
-    const isSel = $(this).hasClass('sel');
-
-    if (isSel) return;
-
-    const cells = e.data;
+  set currentFrame(frameIndex) {
+    const cells = this._cells;
     cells.removeClass('sel');
-    $(this).addClass('sel');
-
-    const index = parseInt($(this).attr('index'));
-
-    Events.dispatch(DOMInterfaceTableGotoRow.EVENT_TYPES.GOTO, index);
+    $(cells.get(frameIndex)).addClass('sel');
   }
-};
 
-DOMInterfaceTableGotoRow.EVENT_TYPES = {
-  GOTO: 'domiftblgotorow-goto'
+  _clickFrame(frameIndex, dragging) {
+    assertParameters(arguments, Number, Boolean);
+
+    Events.dispatch(DOMInterfaceTableRow.EVENT_TYPES.CHANGE_FRAME, frameIndex);
+  }
 };

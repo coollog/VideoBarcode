@@ -24,9 +24,13 @@ class FrameInterface {
     Events.on(DOMInterface.EVENT_TYPES.READY, this._domInterfaceReady, this);
     Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON, this._addPolygon, this);
 
-    Events.on(DOMInterfaceTableGotoRow.EVENT_TYPES.GOTO, this._gotoFrame, this);
+    Events.on(DOMInterfaceTableRow.EVENT_TYPES.CHANGE_FRAME,
+        this._gotoFrame, this);
+
     Events.on(DOMInterfaceTablePolygonRow.EVENT_TYPES.ACTIVATE,
         this._startEditingPolygon, this);
+    Events.on(DOMInterfaceTablePolygonRow.EVENT_TYPES.ADD_KEYFRAME,
+        this._addKeyframe, this);
 
     Events.on(DOMInterfaceTableKeyframeRow.EVENT_TYPES.DEACTIVATE_ALL,
         this._deactivatePolygons, this);
@@ -34,6 +38,9 @@ class FrameInterface {
     Events.on(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.ACTIVATE,
         this._startMovingPolygon, this);
     Events.on(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.CHANGE,
+        this._polygonPositionChanged, this);
+
+    Events.on(PolygonInterface.EVENT_TYPES.MOVE,
         this._polygonPositionChanged, this);
 
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._draw, this);
@@ -67,6 +74,10 @@ class FrameInterface {
     this._polygonInterfaces[polygonId].startMoving();
   }
 
+  _addKeyframe(polygonId, frameIndex) {
+    this._frameModel.getFrame(frameIndex).addKeyFrame(polygonId);
+  }
+
   _deactivatePolygons() {
     assertParameters(arguments);
 
@@ -87,7 +98,11 @@ class FrameInterface {
   _polygonPositionChanged(polygonId, newPosition) {
     assertParameters(arguments, Number, Coordinate);
 
-    this._frameModel.getPolygon(polygonId).position = newPosition;
+    // Make keyframe.
+    this._frameModel.currentFrame.addPositionKeyFrame(
+        polygonId, newPosition);
+
+    // this._frameModel.getPolygon(polygonId).position = newPosition;
   }
 
   _draw() {

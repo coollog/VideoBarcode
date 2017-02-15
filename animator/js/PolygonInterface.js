@@ -118,6 +118,7 @@ class PolygonInterface {
     assertParameters(arguments, PolygonModel.Point);
 
     const newPoint = new PolygonPointInterface(
+        this._polygon,
         point,
         PolygonInterface._scaleCoord,
         PolygonInterface._inverseScaleCoord.bind(
@@ -131,8 +132,9 @@ class PolygonInterface {
     if (!this._isEditing) return;
 
     // Add a new point.
-    const inverseScaledCoord = PolygonInterface._inverseScaleCoordCanvas(
-        mousePosition, canvas);
+    const inverseScaledCoord =
+        PolygonInterface._inverseScaleCoordCanvas(mousePosition, canvas)
+            .subtract(this._polygonPosition);
     const newPoint = this._polygon.addPoint(inverseScaledCoord);
     this._addPointInterface(newPoint);
   }
@@ -159,7 +161,8 @@ class PolygonInterface {
     this._dragLast = inverseScaledCoord;
 
     const newPosition = this._polygon.position.translate(dragDelta);
-    this._polygon.position = newPosition;
+
+    Events.dispatch(PolygonInterface.EVENT_TYPES.MOVE, this._id, newPosition);
   }
 
   _onDragEnd() {
@@ -185,4 +188,8 @@ PolygonInterface._STATES = {
   IDLE: 0,
   EDITING: 1,
   MOVING: 2
+};
+
+PolygonInterface.EVENT_TYPES = {
+  MOVE: 'polyint-move'
 };

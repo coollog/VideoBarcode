@@ -40,6 +40,19 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
         .change(this._inputChanged.bind(this));
   }
 
+  _clickFrame(frameIndex, dragging) {
+    assertParameters(arguments, Number, Boolean);
+
+    if (!super._clickFrame(frameIndex, dragging)) return;
+
+    this.addKeyframe(frameIndex);
+
+    Events.dispatch(
+        DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.ADD_KEYFRAME,
+        this._polygonId,
+        frameIndex);
+  }
+
   _inputClicked(e) {
     assertParameters(arguments, $.Event);
 
@@ -71,5 +84,6 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
 
 DOMInterfaceTablePolygonPositionRow.EVENT_TYPES = {
   ACTIVATE: 'domiftblpolyposrow-activate',
-  CHANGE: 'domiftblpolyposrow-change'
+  CHANGE: 'domiftblpolyposrow-change',
+  ADD_KEYFRAME: 'domiftblpolyposrow-addkeyframe'
 };

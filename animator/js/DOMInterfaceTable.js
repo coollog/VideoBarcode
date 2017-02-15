@@ -28,9 +28,8 @@ class DOMInterfaceTable {
     Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON,
         this._addPolygonPositionRow, this);
     Events.on(FrameModel.EVENT_TYPES.CHANGE_FRAME, this._changeFrame, this);
-
-    Events.on(PolygonModel.EVENT_TYPES.CHANGE_POSITION,
-        this._changePolygonPosition, this)
+    Events.on(FrameModel.EVENT_TYPES.ADD_POSITION_KEYFRAME,
+        this._addPositionKeyFrame, this);
   }
 
   activate() {
@@ -73,7 +72,7 @@ class DOMInterfaceTable {
 
     const rowId = `kf-polyposition${polygonId}`;
     const rowContent = DOMInterfaceTable.POLYGON_POSITION_ROW_CONTENT(
-        this._frameModel.getPolygon(polygonId).position);
+        this._frameModel.getPolygonPosition(polygonId));
     this._addRow(
         rowId, `keyframe-row`, rowContent, `kf-polyposition`, (i) => ``);
 
@@ -101,28 +100,37 @@ class DOMInterfaceTable {
   _changeFrame(frameIndex) {
     assertParameters(arguments, Number);
 
+    this._gotoRow.currentFrame = frameIndex;
+
     for (const polygonRow of Object.values(this._polygonRows)) {
       polygonRow.currentFrame = frameIndex;
     }
 
     for (const positionRow of Object.values(this._polygonPositionRows)) {
       positionRow.currentFrame = frameIndex;
+
+      const position =
+          this._frameModel.getPolygon(positionRow.polygonId).position;
+      positionRow.changePosition(position);
     }
   }
 
-  _changePolygonPosition(polygonId) {
-    assertParameters(arguments, Number);
+  _addPositionKeyFrame(frameIndex, polygonId) {
+    assertParameters(arguments, Number, Number);
 
-    const position = this._frameModel.getPolygon(polygonId).position;
-    this._polygonPositionRows[polygonId].changePosition(position);
+    this._polygonPositionRows[polygonId].addKeyframe(frameIndex);
   }
 };
 
 DOMInterfaceTable.POLYGON_ROW_CONTENT = function(polygonId) {
+  assertParameters(arguments, Number);
+
   return `Polygon ${polygonId}`;
 };
 
 DOMInterfaceTable.POLYGON_POSITION_ROW_CONTENT = function(coord) {
+  assertParameters(arguments, Coordinate);
+
   const x = coord.x;
   const y = coord.y;
   return `

@@ -9,25 +9,17 @@
  *       Should prob calculate nearest MIDPOINT on EDGE.
  */
 class PolygonModel {
-  constructor(id) {
-    assertParameters(arguments, Number);
+  constructor(id, getPositionFn) {
+    assertParameters(arguments, Number, Function);
 
     this._id = id;
+    this._getPositionFn = getPositionFn;
 
     this._firstPoint = null;
-
-    this._position = new Coordinate(0, 0);
   }
 
   get position() {
-    return this._position;
-  }
-  set position(coord) {
-    assertParameters(arguments, Coordinate);
-
-    this._position = coord;
-
-    Events.dispatch(PolygonModel.EVENT_TYPES.CHANGE_POSITION, this._id);
+    return this._getPositionFn();
   }
 
   get coords() {
@@ -240,6 +232,4 @@ PolygonModel.Point = class {
   }
 };
 
-PolygonModel.EVENT_TYPES = {
-  CHANGE_POSITION: 'polymodel-position'
-};
+PolygonModel.START_POSITION = new Coordinate(0, 0);

@@ -20,12 +20,22 @@ class DOMInterfaceTableKeyframeRow extends DOMInterfaceTableRow {
     this._setupDOM(active);
   }
 
+  get polygonId() {
+    return this._polygonId;
+  }
+
   set currentFrame(frameIndex) {
     assertParameters(arguments, Number);
 
     this._currentFrame = frameIndex;
     this._cells.removeClass('current')
         .filter(`[index=${frameIndex}]`).addClass('current');
+  }
+
+  addKeyframe(frameIndex) {
+    assertParameters(arguments, Number);
+
+    $(this._cells.get(frameIndex)).addClass('keyframe');
   }
 
   get _headColElem() {
@@ -54,6 +64,17 @@ class DOMInterfaceTableKeyframeRow extends DOMInterfaceTableRow {
 
     this._activate();
     this._dispatchActivateEvent();
+  }
+
+  // Clicking a frame changes the frame and possibly adds a keyframe.
+  _clickFrame(frameIndex, dragging) {
+    assertParameters(arguments, Number, Boolean);
+
+    if (dragging) return false;
+
+    Events.dispatch(DOMInterfaceTableRow.EVENT_TYPES.CHANGE_FRAME, frameIndex);
+
+    return true;
   }
 
   _updateActive() {
