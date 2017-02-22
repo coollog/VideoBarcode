@@ -25,7 +25,7 @@ function assertUnimplemented() {
 //   the end means there can be any number of optional arguments that follow.
 // Note that optional parameters can only be at the end of the parameter list.
 function assertParameters(params, ...types) {
-  const paramGen = params[Symbol.iterator]();
+  const paramGen = Array.from(params)[Symbol.iterator]();
   const typeGen = types[Symbol.iterator]();
 
   while (true) {

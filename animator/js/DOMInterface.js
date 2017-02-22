@@ -29,6 +29,22 @@ class DOMInterface {
     $('#but-add-polygon').click(() => {
       this._frameModel.addPolygon();
     });
+
+    $('#but-generate-qrcode').click(() => {
+      const encoded = (new AnimationEncoder(this._frameModel)).encode();
+      console.log(encoded.length);
+      console.log(btoa(encoded));
+
+      $('#qrcode').html('');
+      var qrcode = new QRCode($('#qrcode')[0], {
+        text: encoded,
+        width: 128,
+        height: 128,
+        colorDark : '#000000',
+        colorLight : '#ffffff',
+        correctLevel : QRCode.CorrectLevel.L
+      });
+    });
   }
 };
 

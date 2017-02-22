@@ -102,11 +102,11 @@ class DOMInterfaceTable {
 
     this._gotoRow.currentFrame = frameIndex;
 
-    for (const polygonRow of Object.values(this._polygonRows)) {
+    for (let polygonRow of Object.values(this._polygonRows)) {
       polygonRow.currentFrame = frameIndex;
     }
 
-    for (const positionRow of Object.values(this._polygonPositionRows)) {
+    for (let positionRow of Object.values(this._polygonPositionRows)) {
       positionRow.currentFrame = frameIndex;
 
       const position =
@@ -118,6 +118,7 @@ class DOMInterfaceTable {
   _addPositionKeyFrame(frameIndex, polygonId) {
     assertParameters(arguments, Number, Number);
 
+    this._polygonRows[polygonId].addKeyframe(frameIndex);
     this._polygonPositionRows[polygonId].addKeyframe(frameIndex);
   }
 };

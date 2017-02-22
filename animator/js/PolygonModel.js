@@ -18,6 +18,10 @@ class PolygonModel {
     this._firstPoint = null;
   }
 
+  get id() {
+    return this._id;
+  }
+
   get position() {
     return this._getPositionFn();
   }
@@ -25,7 +29,7 @@ class PolygonModel {
   get coords() {
     let coords = [];
 
-    for (const pt of this.points) {
+    for (let pt of this.points) {
       coords.push(pt.coord);
     }
 
@@ -81,7 +85,7 @@ class PolygonModel {
     let minPt = null;
     let minPtDist = Number.MAX_SAFE_INTEGER;
 
-    for (const pt of this.points) {
+    for (let pt of this.points) {
       const dist = pt.distanceTo(newPoint);
       if (dist < minPtDist) {
         minPt = pt;
@@ -164,6 +168,14 @@ PolygonModel.Point = class {
   set coord(coord) {
     assertParameters(arguments, Coordinate);
 
+    if (!coord.isWithin(
+        PolygonModel.Point._BOUND_TOP_LEFT,
+        PolygonModel.Point._BOUND_BOTTOM_RIGHT)) {
+      coord = coord.moveWithin(
+          PolygonModel.Point._BOUND_TOP_LEFT,
+          PolygonModel.Point._BOUND_BOTTOM_RIGHT);
+    }
+
     this._coord = coord;
   }
 
@@ -232,4 +244,8 @@ PolygonModel.Point = class {
   }
 };
 
+PolygonModel.Point._BOUND_TOP_LEFT = new Coordinate(0, 0);
+PolygonModel.Point._BOUND_BOTTOM_RIGHT = new Coordinate(255, 255);
+
 PolygonModel.START_POSITION = new Coordinate(0, 0);
+

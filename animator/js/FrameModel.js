@@ -98,7 +98,7 @@ class FrameModel {
     const id = FrameModel._nextPolygonId ++;
     const poly = new PolygonModel(id, this.getPolygonPosition.bind(this, id));
 
-    for (const coord of FrameModel._DEFAULT_POLYGON) {
+    for (let coord of FrameModel._DEFAULT_POLYGON) {
       poly.addPoint(coord);
     }
 
@@ -165,7 +165,7 @@ FrameModel.Frame = class {
 
     this._frameModel.currentFrame = this._frameIndex;
     this._positionKeyFrames[polygonId] =
-        new FrameModel.Frame.PositionKeyFrame(newPosition);
+        new FrameModel.Frame.PositionKeyFrame(this._frameIndex, newPosition);
 
     Events.dispatch(FrameModel.EVENT_TYPES.ADD_POSITION_KEYFRAME,
         this._frameIndex, polygonId);
@@ -182,10 +182,15 @@ FrameModel.Frame = class {
  * Represents a single keyframe for a polygon.
  */
 FrameModel.Frame.PositionKeyFrame = class {
-  constructor(coord) {
-    assertParameters(arguments, Coordinate);
+  constructor(frameIndex, coord) {
+    assertParameters(arguments, Number, Coordinate);
 
+    this._frameIndex = frameIndex;
     this._position = coord;
+  }
+
+  get frameIndex() {
+    return this._frameIndex;
   }
 
   get position() {

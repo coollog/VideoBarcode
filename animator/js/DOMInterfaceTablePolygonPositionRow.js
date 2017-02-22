@@ -45,7 +45,7 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
 
     if (!super._clickFrame(frameIndex, dragging)) return;
 
-    this.addKeyframe(frameIndex);
+    // this.addKeyframe(frameIndex);
 
     Events.dispatch(
         DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.ADD_KEYFRAME,

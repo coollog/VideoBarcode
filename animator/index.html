@@ -25,6 +25,7 @@
     box-shadow: 0 0 10px #999;
     border: none;
     cursor: pointer;
+    margin-right: 1em;
   }
   button:hover {
     opacity: 0.5;
@@ -34,9 +35,18 @@
     opacity: 1;
   }
 
+  #but-generate-qrcode {
+    background: #7d7;
+  }
+  #qrcode {
+    margin-top: 1em;
+  }
+
   #canvas {
     border: 1px solid black;
     outline: none;
+    width: 720;
+    height: 480;
   }
   #main {
     max-width: 720px;
@@ -127,15 +137,23 @@
 
   <div id="controls">
     <button id="but-add-polygon">Add Polygon</button>
+    <button id="but-generate-qrcode">Generate Barcode</button>
   </div>
+
+  <div id="qrcode"></div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://davidshimjs.github.io/qrcodejs/qrcode.min.js"></script>
+
 <script src="js/Colors.js"></script>
 <script src="js/Assert.js"></script>
 <script src="js/Coordinate.js"></script>
+<script src="js/Size.js"></script>
+<script src="js/Envelope.js"></script>
 <script src="js/PolygonModel.js"></script>
 <script src="js/FrameModel.js"></script>
+<script src="js/AnimationEncoder.js"></script>
 <script src="js/PriorityQueue.js"></script>
 <script src="js/Events.js"></script>
 <script src="js/DOMInterfaceTableRow.js"></script>
@@ -146,6 +164,7 @@
 <script src="js/DOMInterfaceTable.js"></script>
 <script src="js/DOMInterface.js"></script>
 <script src="js/Canvas.js"></script>
+<script src="js/Instructions.js"></script>
 <script src="js/PolygonPointInterface.js"></script>
 <script src="js/PolygonInterface.js"></script>
 <script src="js/FrameInterface.js"></script>
@@ -154,6 +173,16 @@
 <script src="js/InputHandler.js"></script>
 
 <script>
+  if (!('values' in Object)) {
+    Object.prototype.values = function() {
+      const values = [];
+      for (let key in this) {
+        values.push(this[key]);
+      }
+      return values;
+    };
+  }
+
   const FPS = 60;
 
   const canvas = new Canvas('canvas');

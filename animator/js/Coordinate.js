@@ -77,6 +77,36 @@ class Coordinate {
     return new Coordinate(this._x * magnitudeX, this._y * magnitudeY);
   }
 
+  // Returns true if coordinate is within rectangle defined by the two
+  // coordinates as corners.
+  isWithin(coord1, coord2) {
+    assertParameters(arguments, Coordinate, Coordinate);
+
+    const minX = Math.min(coord1.x, coord2.x);
+    const minY = Math.min(coord1.y, coord2.y);
+    const maxX = Math.max(coord1.x, coord2.x);
+    const maxY = Math.max(coord1.y, coord2.y);
+
+    const isIn = this._x >= minX && this._x <= maxX && this._y >= minY &&
+        this._y <= maxY;
+    return isIn;
+  }
+
+  // Returns the coordinate moved to be within the rectangle.
+  moveWithin(coord1, coord2) {
+    assertParameters(arguments, Coordinate, Coordinate);
+
+    const minX = Math.min(coord1.x, coord2.x);
+    const minY = Math.min(coord1.y, coord2.y);
+    const maxX = Math.max(coord1.x, coord2.x);
+    const maxY = Math.max(coord1.y, coord2.y);
+
+    const x = Math.min(maxX, Math.max(minX, this._x));
+    const y = Math.min(maxY, Math.max(minY, this._y));
+
+    return new Coordinate(x, y);
+  }
+
   toArray() {
     assertParameters(arguments);
 

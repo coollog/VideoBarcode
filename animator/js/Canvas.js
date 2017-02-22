@@ -1,5 +1,6 @@
 // import 'Assert'
 // import 'Coordinate'
+// import 'Envelope'
 
 /**
  * Works with the HTML Canvas DOM element.
@@ -30,7 +31,7 @@ class Canvas {
   // Alias for DOM addEventListener.
   listen() {
     assertParameters(arguments, undefined);
-    this._canvas.addEventListener(...arguments);
+    this._canvas.addEventListener(...Array.from(arguments));
   }
 
   // Clears the context.
@@ -140,12 +141,14 @@ class Canvas {
     this._context.globalAlpha = 1.0;
   }
 
-  drawWithShadow(size, color, drawFn) {
-    assertParameters(arguments, Number, String, Function);
+  drawWithShadow(size, color, offset, drawFn) {
+    assertParameters(arguments, Number, String, Coordinate, Function);
 
     this._context.save();
     this._context.shadowBlur = size;
     this._context.shadowColor = color;
+    this._context.shadowOffsetX = offset.x;
+    this._context.shadowOffsetY = offset.y;
     drawFn();
     this._context.restore();
   }
@@ -183,7 +186,7 @@ class Canvas {
     let topPriority = 0;
     let topCursorType = Canvas.CURSOR_TYPE.DEFAULT;
 
-    for (const [owner, value] of this._cursorMap) {
+    for (let [owner, value] of this._cursorMap) {
       const priority = value.priority;
 
       if (priority >= topPriority) {
