@@ -1,4 +1,5 @@
 // import 'Assert'
+// import 'BitBuffer'
 // import 'Coordinate'
 // import 'FrameModel'
 // import 'PolygonModel'
@@ -8,7 +9,7 @@
  *
  * Encoding is:
  * [ POLYGON: NUM POINTS | [ X Y ] |
- *            NUM KEYFRAMES | [ X Y ] ]
+ *   POSITION KEYFRAMES: NUM KEYFRAMES | [ FRAMEINDEX X Y ] ]
  */
 class AnimationEncoder {
   constructor(frameModel) {
@@ -18,34 +19,36 @@ class AnimationEncoder {
   }
 
   encode() {
-    const nums = [];
+    const bitBuffer = new BitBuffer();
 
     for (let polygon of this._frameModel.polygons) {
       // NUM POINTS
       const coords = polygon.coords;
-      nums.push(coords.length);
+      bitBuffer.writeBits(4, coords.length);
 
       for (let coord of coords) {
         // X Y
-        nums.push(coord.x);
-        nums.push(coord.y);
+        bitBuffer.writeBits(8, coord.x);
+        bitBuffer.writeBits(8, coord.y);
       }
 
       // Get position keyframes.
       const keyframes = this._getPositionKeyframesFor(polygon.id);
 
       // NUM KEYFRAMES
-      nums.push(keyframes.length);
+      bitBuffer.writeBits(6, keyframes.length);
 
       for (let keyframe of keyframes) {
         // X Y
-        nums.push(keyframe.frameIndex);
-        nums.push(keyframe.position.x);
-        nums.push(keyframe.position.y);
+        bitBuffer.writeBits(6, keyframe.frameIndex);
+        bitBuffer.writeBits(8, keyframe.position.x);
+        bitBuffer.writeBits(8, keyframe.position.y);
       }
     }
 
-    return String.fromCharCode.apply(null, Uint8Array.from(nums));
+    this._checkEncoding(bitBuffer);
+
+    return String.fromCharCode.apply(null, bitBuffer.toUint8Array());
   }
 
   _getPositionKeyframesFor(polygonId) {
@@ -61,5 +64,34 @@ class AnimationEncoder {
     }
 
     return keyframes;
+  }
+
+  // Just a test function to make sure our encoding is correct.
+  _checkEncoding(bitBuffer) {
+    assertParameters(arguments, BitBuffer);
+
+    for (let polygon of this._frameModel.polygons) {
+      const coords = polygon.coords;
+
+      assertEq(coords.length, bitBuffer.readBits(4));
+
+      for (let coord of coords) {
+        assertEq(coord.x, bitBuffer.readBits(8));
+        assertEq(coord.y, bitBuffer.readBits(8));
+      }
+
+      // Get position keyframes.
+      const keyframes = this._getPositionKeyframesFor(polygon.id);
+
+      // NUM KEYFRAMES
+      assertEq(keyframes.length, bitBuffer.readBits(6));
+
+      for (let keyframe of keyframes) {
+        // X Y
+        assertEq(keyframe.frameIndex, bitBuffer.readBits(6));
+        assertEq(keyframe.position.x, bitBuffer.readBits(8));
+        assertEq(keyframe.position.y, bitBuffer.readBits(8));
+      }
+    }
   }
 };

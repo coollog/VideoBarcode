@@ -4,6 +4,10 @@ function assert(expression, errMsg) {
   }
 }
 
+function assertEq(val1, val2) {
+  assert(val1 == val2, 'fatal error: equality failed');
+}
+
 function assertType(variable, type) {
   if (!(variable instanceof type)) {
     throw new ParameterError(Parameter);
