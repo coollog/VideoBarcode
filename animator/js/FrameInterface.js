@@ -23,7 +23,9 @@ class FrameInterface {
 
     // Attach event listeners.
     Events.on(DOMInterface.EVENT_TYPES.READY, this._domInterfaceReady, this);
+
     Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON, this._addPolygon, this);
+    Events.on(FrameModel.EVENT_TYPES.REMOVE_POLYGON, this._removePolygon, this);
 
     Events.on(DOMInterfaceTableRow.EVENT_TYPES.CHANGE_FRAME,
         this._gotoFrame, this);
@@ -32,6 +34,8 @@ class FrameInterface {
         this._startEditingPolygon, this);
     Events.on(DOMInterfaceTablePolygonRow.EVENT_TYPES.ADD_KEYFRAME,
         this._addKeyframe, this);
+    Events.on(DOMInterfaceTablePolygonRow.EVENT_TYPES.REMOVE_KEYFRAME,
+        this._removeKeyframe, this);
 
     Events.on(DOMInterfaceTableKeyframeRow.EVENT_TYPES.DEACTIVATE_ALL,
         this._deactivatePolygons, this);
@@ -42,6 +46,8 @@ class FrameInterface {
         this._polygonPositionChanged, this);
     Events.on(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.ADD_KEYFRAME,
         this._addPositionKeyframe, this);
+    Events.on(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.REMOVE_KEYFRAME,
+        this._removePositionKeyframe, this);
 
     Events.on(PolygonInterface.EVENT_TYPES.MOVE,
         this._polygonPositionChanged, this);
@@ -128,8 +134,16 @@ class FrameInterface {
     this._frameModel.getFrame(frameIndex).addKeyFrame(polygonId);
   }
 
+  _removeKeyframe(polygonId, frameIndex) {
+    this._frameModel.getFrame(frameIndex).removeKeyFrame(polygonId);
+  }
+
   _addPositionKeyframe(polygonId, frameIndex) {
     this._frameModel.getFrame(frameIndex).addPositionKeyFrame(polygonId);
+  }
+
+  _removePositionKeyframe(polygonId, frameIndex) {
+    this._frameModel.getFrame(frameIndex).removePositionKeyFrame(polygonId);
   }
 
   _deactivatePolygons() {
@@ -138,12 +152,13 @@ class FrameInterface {
     for (let polygon of Object.values(this._polygonInterfaces)) {
       polygon.deactivate();
     }
+
+    this._currentPolygon = null;
   }
 
   _addPolygon(polygonId) {
     assertParameters(arguments, Number);
 
-    // Should prob change frame to 0.
     const newPolygon = new PolygonInterface(
         this._frameModel, polygonId,
         FrameInterface._scaleCoord,
@@ -151,6 +166,13 @@ class FrameInterface {
             FrameInterface._AREA_SIZE));
     this._polygonInterfaces[polygonId] = newPolygon;
     this._startEditingPolygon(polygonId);
+  }
+
+  _removePolygon(polygonId) {
+    assertParameters(arguments, Number);
+
+    this._polygonInterfaces[polygonId].remove();
+    delete this._polygonInterfaces[polygonId];
   }
 
   _polygonPositionChanged(polygonId, newPosition) {

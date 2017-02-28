@@ -38,6 +38,21 @@ class DOMInterfaceTableKeyframeRow extends DOMInterfaceTableRow {
     $(this._cells.get(frameIndex)).addClass('keyframe');
   }
 
+  removeKeyframe(frameIndex) {
+    assertParameters(arguments, Number);
+
+    $(this._cells.get(frameIndex)).removeClass('keyframe');
+  }
+
+  remove() {
+    super.remove();
+
+    Events.off(DOMInterfaceTableKeyframeRow.EVENT_TYPES.DEACTIVATE_ALL, this);
+    assertEq(true, Events.hasNoneForOwner(this));
+
+    this._headColElem.off();
+  }
+
   get _headColElem() {
     assertParameters(arguments);
 

@@ -40,6 +40,11 @@ class PriorityQueue {
     return node.get(key);
   }
 
+  // Returns true if 'key' exists in any node.
+  hasKey(key) {
+    return this._keyMap.has(key);
+  }
+
   // Push 'data' into the queue with 'priority'. Replaces any existing value
   // associated with 'key' if 'key' exists.
   push(priority, key, value) {

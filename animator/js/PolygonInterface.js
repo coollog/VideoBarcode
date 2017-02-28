@@ -70,6 +70,21 @@ class PolygonInterface {
     this._state = PolygonInterface._STATES.IDLE;
   }
 
+  remove() {
+    assertParameters(arguments);
+
+    this.deactivate();
+
+    Events.off(InputHandler.EVENT_TYPES.CLICK_NO_DRAG, this);
+    Events.off(InputHandler.EVENT_TYPES.DRAG_START, this);
+    Events.off(InputHandler.EVENT_TYPES.DRAG, this);
+    Events.off(InputHandler.EVENT_TYPES.DRAG_END, this);
+
+    Events.off(DrawTimer.EVENT_TYPES.DRAW, this);
+
+    assertEq(true, Events.hasNoneForOwner(this));
+  }
+
   get _scaledCoords() {
     assertParameters(arguments);
 

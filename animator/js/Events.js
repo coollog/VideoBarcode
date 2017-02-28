@@ -55,6 +55,17 @@ class Events {
       }
     }
   }
+
+  // Returns true if there are no events associated with 'owner'.
+  static hasNoneForOwner(owner) {
+    assertParameters(arguments, Object);
+
+    for (let eventQueue of Object.values(Events._events)) {
+      if (eventQueue.hasKey(owner)) return false;
+    }
+
+    return true;
+  }
 }
 
 // Holds the dictionary of events.

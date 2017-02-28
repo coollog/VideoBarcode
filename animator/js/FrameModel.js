@@ -108,6 +108,14 @@ class FrameModel {
 
     return id;
   }
+
+  removePolygon(polygonId) {
+    assertParameters(arguments, Number);
+
+    delete this._polygons[polygonId];
+
+    Events.dispatch(FrameModel.EVENT_TYPES.REMOVE_POLYGON, polygonId);
+  }
 };
 
 /**
@@ -175,6 +183,9 @@ FrameModel.Frame = class {
     assertParameters(arguments, Number);
 
     delete this._positionKeyFrames[polygonId];
+
+    Events.dispatch(FrameModel.EVENT_TYPES.REMOVE_POSITION_KEYFRAME,
+        this._frameIndex, polygonId);
   }
 };
 
@@ -222,7 +233,10 @@ FrameModel._DEFAULT_POLYGON = [
 FrameModel._nextPolygonId = 0;
 
 FrameModel.EVENT_TYPES = {
-  ADD_POLYGON: 'framemodel-addpolygon',
+  ADD_POLYGON: 'framemodel-addpolygon', // PolygonId
+  REMOVE_POLYGON: 'framemodel-removepolygon', // PolygonId
   CHANGE_FRAME: 'framemodel-changeframe',
-  ADD_POSITION_KEYFRAME: 'framemodel-addposkeyframe' // FrameIndex, PolygonId
+  ADD_POSITION_KEYFRAME: 'framemodel-addposkeyframe', // FrameIndex, PolygonId
+  REMOVE_POSITION_KEYFRAME:
+      'framemodel-removeposkeyframe' // FrameIndex, PolygonId
 };

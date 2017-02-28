@@ -34,7 +34,16 @@
     box-shadow: 0 0 5px #222;
     opacity: 1;
   }
+  button:disabled {
+    background: #dca !important;
+  }
 
+  #but-remove-polygon {
+    background: #fa0;
+  }
+  #but-preview {
+    background: #ad8;
+  }
   #but-generate-qrcode {
     background: #7d7;
   }
@@ -137,6 +146,8 @@
 
   <div id="controls">
     <button id="but-add-polygon">Add Polygon</button>
+    <button id="but-remove-polygon" disabled>Remove Polygon</button>
+    <button id="but-preview">Preview</button>
     <button id="but-generate-qrcode">Generate Barcode</button>
   </div>
 

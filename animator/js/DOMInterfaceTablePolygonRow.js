@@ -29,6 +29,15 @@ class DOMInterfaceTablePolygonRow extends DOMInterfaceTableKeyframeRow {
         frameIndex);
   }
 
+  _doubleclickFrame(frameIndex) {
+    assertParameters(arguments, Number);
+
+    Events.dispatch(
+        DOMInterfaceTablePolygonRow.EVENT_TYPES.REMOVE_KEYFRAME,
+        this._polygonId,
+        frameIndex);
+  }
+
   _dispatchActivateEvent() {
     assertParameters(arguments);
 
@@ -39,5 +48,6 @@ class DOMInterfaceTablePolygonRow extends DOMInterfaceTableKeyframeRow {
 
 DOMInterfaceTablePolygonRow.EVENT_TYPES = {
   ACTIVATE: 'domiftblpolyrow-activate',
-  ADD_KEYFRAME: 'domiftblpolyrow-add'
+  ADD_KEYFRAME: 'domiftblpolyrow-add',
+  REMOVE_KEYFRAME: 'domiftblpolyrow-remove'
 };

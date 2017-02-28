@@ -53,6 +53,15 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
         frameIndex);
   }
 
+  _doubleclickFrame(frameIndex) {
+    assertParameters(arguments, Number);
+
+    Events.dispatch(
+        DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.REMOVE_KEYFRAME,
+        this._polygonId,
+        frameIndex);
+  }
+
   _inputClicked(e) {
     assertParameters(arguments, $.Event);
 
@@ -85,5 +94,6 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
 DOMInterfaceTablePolygonPositionRow.EVENT_TYPES = {
   ACTIVATE: 'domiftblpolyposrow-activate',
   CHANGE: 'domiftblpolyposrow-change',
-  ADD_KEYFRAME: 'domiftblpolyposrow-addkeyframe'
+  ADD_KEYFRAME: 'domiftblpolyposrow-addkeyframe',
+  REMOVE_KEYFRAME: 'domiftblpolyposrow-removekeyframe'
 };
