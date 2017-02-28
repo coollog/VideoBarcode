@@ -14,14 +14,12 @@ class BitBuffer {
   writeBits(nBits, num) {
     assertParameters(arguments, Number, Number);
 
-    if (num >= 1 << nBits) return false;
+    assert(num < 1 << nBits);
 
     for (let i = 0; i < nBits; i ++) {
       const bitPosition = this._getStartBit(nBits - i);
       this._buffer.push((num & (1 << bitPosition)) >> bitPosition);
     }
-
-    return true;
   }
 
   readBits(nBits) {

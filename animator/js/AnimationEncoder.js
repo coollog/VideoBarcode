@@ -39,14 +39,16 @@ class AnimationEncoder {
       bitBuffer.writeBits(6, keyframes.length);
 
       for (let keyframe of keyframes) {
+        const position = this._positionToUnsigned(keyframe.position);
+
         // X Y
         bitBuffer.writeBits(6, keyframe.frameIndex);
-        bitBuffer.writeBits(8, keyframe.position.x);
-        bitBuffer.writeBits(8, keyframe.position.y);
+        bitBuffer.writeBits(8, position.x);
+        bitBuffer.writeBits(8, position.y);
       }
     }
 
-    this._checkEncoding(bitBuffer);
+    // this._checkEncoding(bitBuffer);
 
     return String.fromCharCode.apply(null, bitBuffer.toUint8Array());
   }
@@ -64,6 +66,12 @@ class AnimationEncoder {
     }
 
     return keyframes;
+  }
+
+  _positionToUnsigned(position) {
+    assertParameters(arguments, Coordinate);
+
+    return position.subtract(FrameModel.Frame.PositionKeyFrame._BOUND_TOP_LEFT);
   }
 
   // Just a test function to make sure our encoding is correct.

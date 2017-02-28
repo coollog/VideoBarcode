@@ -47,6 +47,7 @@ class FrameInterface {
         this._polygonPositionChanged, this);
 
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._draw, this);
+    Events.on(DrawTimer.EVENT_TYPES.DRAW, this._drawOverlay, this, 100);
   }
 
   static _scaleCoord(coord, toWidth, toHeight) {
@@ -77,6 +78,22 @@ class FrameInterface {
         .scale(toSize / fromHeight);
 
     return coord;
+  }
+
+  static _getFrameTopLeft(canvas) {
+    assertParameters(arguments, Canvas);
+
+    return FrameInterface._scaleCoord(
+        new Coordinate(0, 0), canvas.width, canvas.height)
+  }
+
+  static _getFrameBottomRight(canvas) {
+    assertParameters(arguments, Canvas);
+
+    return FrameInterface._scaleCoord(
+        new Coordinate(
+            FrameInterface._AREA_SIZE - 1, FrameInterface._AREA_SIZE - 1),
+        canvas.width, canvas.height);
   }
 
   _domInterfaceReady() {
@@ -149,19 +166,9 @@ class FrameInterface {
   _draw(canvas) {
     assertParameters(arguments, Canvas);
 
-    // Draw background.
-    const backgroundEnvelope = new Envelope(
-        new Coordinate(0, 0), new Size(canvas.width, canvas.height));
-    canvas.drawRectangle(Canvas.RECTANGLE_TYPE.FILL, backgroundEnvelope,
-        FrameInterface._BACKGROUND);
-
     // Draw stage.
-    const topLeft = FrameInterface._scaleCoord(
-        new Coordinate(0, 0), canvas.width, canvas.height);
-    const bottomRight = FrameInterface._scaleCoord(
-        new Coordinate(
-            FrameInterface._AREA_SIZE - 1, FrameInterface._AREA_SIZE - 1),
-        canvas.width, canvas.height);
+    const topLeft = FrameInterface._getFrameTopLeft(canvas);
+    const bottomRight = FrameInterface._getFrameBottomRight(canvas);
     const stageEnvelope = Envelope.fromCoordinates(topLeft, bottomRight);
     canvas.drawWithShadow(
         FrameInterface._SHADOW_SIZE,
@@ -169,6 +176,37 @@ class FrameInterface {
         FrameInterface._SHADOW_OFFSET,
         () => canvas.drawRectangle(
             Canvas.RECTANGLE_TYPE.FILL, stageEnvelope, 'white'));
+  }
+
+  _drawOverlay(canvas) {
+    assertParameters(arguments, Canvas);
+
+    // Draw overlay.
+    const stageTopLeft = FrameInterface._getFrameTopLeft(canvas);
+    const stageBottomRight = FrameInterface._getFrameBottomRight(canvas);
+
+    const top = Envelope.fromCoordinates(
+        new Coordinate(0, 0), new Coordinate(canvas.width, stageTopLeft.y));
+    const bottom = Envelope.fromCoordinates(
+        new Coordinate(0, stageBottomRight.y),
+        new Coordinate(canvas.width, canvas.height));
+    const left = Envelope.fromCoordinates(
+        new Coordinate(0, stageTopLeft.y),
+        new Coordinate(stageTopLeft.x, stageBottomRight.y));
+    const right = Envelope.fromCoordinates(
+        new Coordinate(stageBottomRight.x, stageTopLeft.y),
+        new Coordinate(canvas.width, stageBottomRight.y));
+
+    canvas.drawWithOpacity(0.8, () => {
+      canvas.drawRectangle(
+          Canvas.RECTANGLE_TYPE.FILL, top, FrameInterface._BACKGROUND);
+      canvas.drawRectangle(
+          Canvas.RECTANGLE_TYPE.FILL, bottom, FrameInterface._BACKGROUND);
+      canvas.drawRectangle(
+          Canvas.RECTANGLE_TYPE.FILL, left, FrameInterface._BACKGROUND);
+      canvas.drawRectangle(
+          Canvas.RECTANGLE_TYPE.FILL, right, FrameInterface._BACKGROUND);
+    });
   }
 };
 

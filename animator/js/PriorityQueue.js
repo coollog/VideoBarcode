@@ -22,7 +22,12 @@ class PriorityQueue {
 
   // Returns true if node(s) with 'priority' has 'key'.
   has(priority, key) {
-    return this._hasPriority(priority) && this._keyMap.has(key);
+    if (!this._hasPriority(priority)) return false;
+
+    const nodeId = this._priorityMap[priority];
+    const node = this._getNode(nodeId);
+
+    return node.has(key);
   }
 
   // Returns the value associated with 'key' of node with 'priority'.

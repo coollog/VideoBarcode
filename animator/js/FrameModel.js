@@ -185,6 +185,14 @@ FrameModel.Frame.PositionKeyFrame = class {
   constructor(frameIndex, coord) {
     assertParameters(arguments, Number, Coordinate);
 
+    if (!coord.isWithin(
+        FrameModel.Frame.PositionKeyFrame._BOUND_TOP_LEFT,
+        FrameModel.Frame.PositionKeyFrame._BOUND_BOTTOM_RIGHT)) {
+      coord = coord.moveWithin(
+          FrameModel.Frame.PositionKeyFrame._BOUND_TOP_LEFT,
+          FrameModel.Frame.PositionKeyFrame._BOUND_BOTTOM_RIGHT);
+    }
+
     this._frameIndex = frameIndex;
     this._position = coord;
   }
@@ -197,6 +205,10 @@ FrameModel.Frame.PositionKeyFrame = class {
     return this._position;
   }
 };
+
+FrameModel.Frame.PositionKeyFrame._BOUND_TOP_LEFT = new Coordinate(-128, -128);
+FrameModel.Frame.PositionKeyFrame._BOUND_BOTTOM_RIGHT =
+    new Coordinate(127, 127);
 
 FrameModel.KEYFRAMES = 64;
 FrameModel.FPS = 16;

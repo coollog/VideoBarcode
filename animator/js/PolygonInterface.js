@@ -32,7 +32,9 @@ class PolygonInterface {
     Events.on(InputHandler.EVENT_TYPES.DRAG_START, this._onDragStart, this);
     Events.on(InputHandler.EVENT_TYPES.DRAG, this._onDrag, this);
     Events.on(InputHandler.EVENT_TYPES.DRAG_END, this._onDragEnd, this);
+
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._draw, this);
+    Events.on(DrawTimer.EVENT_TYPES.DRAW, this._drawInstructions, this, 200);
   }
 
   startEditing() {
@@ -158,13 +160,17 @@ class PolygonInterface {
   _draw(canvas) {
     assertParameters(arguments, Canvas);
 
-    if (this._isEditing) {
-      Instructions.draw(canvas, PolygonInterface._EDIT_INSTRUCTIONS);
-    }
-
     const color = this._isIdle ?
         COLORS.POLYGON_INTERFACE_IDLE : COLORS.POLYGON_INTERFACE_ACTIVE;
     canvas.drawPolygon(this._scaledCoords, color, true);
+  }
+
+  _drawInstructions(canvas) {
+    assertParameters(arguments, Canvas);
+
+    if (this._isEditing) {
+      Instructions.draw(canvas, PolygonInterface._EDIT_INSTRUCTIONS);
+    }
   }
 };
 
