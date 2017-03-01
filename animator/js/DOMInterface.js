@@ -56,6 +56,18 @@ class DOMInterface {
     return $('#qrcode');
   }
 
+  static get BACKGROUND_IMAGE_CHOOSER() {
+    return $('#backimage');
+  }
+
+  static get BACKGROUND_IMAGE_CHOOSER_LABEL() {
+    return $('#choosebackimglabel');
+  }
+
+  static get BACKGROUND_IMAGE_CHOOSER_BUTTON() {
+    return $('#choosebackimg');
+  }
+
   _activateButtons() {
     assertParameters(arguments);
 
@@ -98,6 +110,28 @@ class DOMInterface {
         correctLevel : QRCode.CorrectLevel.L
       });
     });
+
+    DOMInterface.BACKGROUND_IMAGE_CHOOSER.change(function() {
+      const choosebackimglabelHTML =
+          DOMInterface.BACKGROUND_IMAGE_CHOOSER_LABEL.html();
+      DOMInterface.BACKGROUND_IMAGE_CHOOSER_LABEL.html(
+          DOMInterface.BACKGROUND_IMAGE_CHOOSER_LABEL_LOADING);
+      DOMInterface.BACKGROUND_IMAGE_CHOOSER_BUTTON.addClass('disabled');
+      DOMInterface.BACKGROUND_IMAGE_CHOOSER.attr('disabled', 'disabled');
+
+      var img = new Image();
+      img.onload = function() {
+        Events.dispatch(DOMInterface.EVENT_TYPES.SELECT_IMAGE, img);
+
+        setTimeout(function() {
+          DOMInterface.BACKGROUND_IMAGE_CHOOSER_LABEL.html(
+            choosebackimglabelHTML);
+          DOMInterface.BACKGROUND_IMAGE_CHOOSER_BUTTON.removeClass('disabled');
+          DOMInterface.BACKGROUND_IMAGE_CHOOSER.removeAttr('disabled');
+        }, 500);
+      }
+      img.src = URL.createObjectURL(this.files[0]);
+    });
   }
 
   _previewStopped() {
@@ -117,7 +151,10 @@ class DOMInterface {
   }
 };
 
+DOMInterface.BACKGROUND_IMAGE_CHOOSER_LABEL_LOADING = `Loading...`;
+
 DOMInterface.EVENT_TYPES = {
   ADD_POLYGON: 'dominterface-add-polygon',
-  READY: 'dominterface-ready'
+  READY: 'dominterface-ready',
+  SELECT_IMAGE: 'dominterface-select-image'
 };

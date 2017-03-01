@@ -53,4 +53,14 @@ class Envelope {
     return diff.x >= 0 && diff.y >= 0 &&
         diff.x < this._size.width && diff.y < this._size.height;
   }
+
+  toArray() {
+    assertParameters(arguments);
+
+    return [...this._topLeft, ...this._size];
+  }
+
+  [Symbol.iterator]() {
+    return this.toArray()[Symbol.iterator]();
+  }
 };

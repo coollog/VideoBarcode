@@ -37,4 +37,8 @@ class Size {
 
     return [this._width, this._height];
   }
+
+  [Symbol.iterator]() {
+    return this.toArray()[Symbol.iterator]();
+  }
 };

@@ -46,8 +46,8 @@ class Canvas {
     assertParameters(arguments, Coordinate, Coordinate);
 
     this._context.beginPath();
-    this._context.moveTo(...startCoord.toArray());
-    this._context.lineTo(...endCoord.toArray());
+    this._context.moveTo(...startCoord);
+    this._context.lineTo(...endCoord);
     this._context.stroke();
   }
 
@@ -58,12 +58,12 @@ class Canvas {
     switch (type) {
       case Canvas.RECTANGLE_TYPE.STROKE:
         this._context.strokeRect(
-            ...envelope.topLeft.toArray(), ...envelope.size.toArray());
+            ...envelope.topLeft, ...envelope.size);
         break;
       case Canvas.RECTANGLE_TYPE.FILL:
         if (color) this._context.fillStyle = color;
         this._context.fillRect(
-            ...envelope.topLeft.toArray(), ...envelope.size.toArray());
+            ...envelope.topLeft, ...envelope.size);
         break;
       default:
         return;
@@ -115,22 +115,30 @@ class Canvas {
     this._context.fillStyle = color;
     this._context.textAlign = textAlign;
     this._context.textBaseline = 'middle';
-    this._context.fillText(text, ...coord.toArray());
+    this._context.fillText(text, ...coord);
   }
 
   // Draw 'img' at 'destCoord', rotated by 'angle', scaled by 'scaleX' and
   // 'scaleY', with origin at 'originCoord'.
-  drawImage(img, destCoord, originCoord, angle, scaleX, scaleY) {
-    assertParameters(arguments, HTMLImageElement, Coordinate, Coordinate,
-        Number, Number, Number);
+  drawImage(img, destCoord, scaleX = 1, scaleY = 1,
+      originCoord = new Coordinate(0, 0), angle = 0) {
+    assertParameters(
+        arguments, HTMLImageElement, Coordinate, [Number, undefined],
+        [Number, undefined], [Coordinate, undefined], [Number, undefined]);
 
     this._context.save();
-    this._context.translate(...destCoord.toArray());
+    this._context.translate(...destCoord);
     this._context.scale(scaleX, scaleY);
     this._context.rotate(angle);
-    this._context.translate(...originCoord.toArray());
+    this._context.translate(...originCoord);
     this._context.drawImage(img, 0, 0);
     this._context.restore();
+  }
+
+  drawImageCropped(img, srcEnvelope, destEnvelope) {
+    assertParameters(arguments, HTMLImageElement, Envelope, Envelope);
+
+    this._context.drawImage(img, ...srcEnvelope, ...destEnvelope);
   }
 
   drawWithOpacity(opacity, drawFn) {

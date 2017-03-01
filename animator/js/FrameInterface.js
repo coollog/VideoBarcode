@@ -21,11 +21,15 @@ class FrameInterface {
     // Map from polygonId to PolygonInterface.
     this._polygonInterfaces = {};
 
+    this._backgroundImage = null;
+
     // Attach event listeners.
     Events.on(DOMInterface.EVENT_TYPES.READY, this._domInterfaceReady, this);
 
     Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON, this._addPolygon, this);
     Events.on(FrameModel.EVENT_TYPES.REMOVE_POLYGON, this._removePolygon, this);
+
+    Events.on(DOMInterface.EVENT_TYPES.SELECT_IMAGE, this._selectImage, this);
 
     Events.on(DOMInterfaceTableRow.EVENT_TYPES.CHANGE_FRAME,
         this._gotoFrame, this);
@@ -185,6 +189,12 @@ class FrameInterface {
     // this._frameModel.getPolygon(polygonId).position = newPosition;
   }
 
+  _selectImage(image) {
+    assertParameters(arguments, HTMLImageElement);
+
+    this._backgroundImage = image;
+  }
+
   _draw(canvas) {
     assertParameters(arguments, Canvas);
 
@@ -198,6 +208,20 @@ class FrameInterface {
         FrameInterface._SHADOW_OFFSET,
         () => canvas.drawRectangle(
             Canvas.RECTANGLE_TYPE.FILL, stageEnvelope, 'white'));
+
+    // Draw background image.
+    if (this._backgroundImage) {
+      const w = this._backgroundImage.width;
+      const h = this._backgroundImage.height
+      const minSize = Math.min(w, h);
+      const srcEnvelope = new Envelope(
+          new Coordinate(w / 2 - minSize / 2, h / 2 - minSize / 2),
+          new Size(minSize, minSize));
+      canvas.drawWithOpacity(0.3, () => {
+        canvas.drawImageCropped(
+            this._backgroundImage, srcEnvelope, stageEnvelope);
+      });
+    }
   }
 
   _drawOverlay(canvas) {

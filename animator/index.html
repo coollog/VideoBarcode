@@ -10,7 +10,7 @@
     margin: 0;
     box-sizing: border-box;
   }
-  input, button {
+  input, button, #choosebackimg {
     font-family: 'Ubuntu Mono', monospace;
     transition: 0.1s all ease-in-out;
     font-size: 1em;
@@ -19,22 +19,24 @@
   input {
     border: 1px solid #ccc;
   }
-  button {
+  button, #choosebackimg {
     padding: 0.5em 1em;
     background: #fc0;
     box-shadow: 0 0 10px #999;
     border: none;
     cursor: pointer;
     margin-right: 1em;
+    white-space: nowrap;
+    margin-bottom: 1.5em;
   }
-  button:hover {
+  button:hover, #choosebackimg:hover {
     opacity: 0.5;
   }
-  button:active {
+  button:active, #choosebackimg:active {
     box-shadow: 0 0 5px #222;
     opacity: 1;
   }
-  button:disabled {
+  button:disabled, #choosebackimg.disabled {
     background: #dca !important;
   }
 
@@ -49,6 +51,9 @@
   }
   #qrcode {
     margin-top: 1em;
+  }
+  #backimage {
+    display: none;
   }
 
   #canvas {
@@ -149,6 +154,11 @@
     <button id="but-remove-polygon" disabled>Remove Polygon</button>
     <button id="but-preview">Preview</button>
     <button id="but-generate-qrcode">Generate Barcode</button>
+    <br />
+    <label id="choosebackimg">
+      <input type="file" id="backimage" accept="image/*" />
+      <span id="choosebackimglabel">Choose Background</span>
+    </label>
   </div>
 
   <div id="qrcode"></div>
