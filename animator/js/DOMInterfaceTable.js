@@ -60,6 +60,14 @@ class DOMInterfaceTable {
     this._gotoRow.activate();
   }
 
+  static get _TABLE() {
+    return $('#keyframes table');
+  }
+
+  static get _TABLE_SCROLLER() {
+    return $('#kf-wrapper');
+  }
+
   _polygonSelected(polygonId) {
     assertParameters(arguments, Number);
 
@@ -86,7 +94,7 @@ class DOMInterfaceTable {
     }
 
     row += `</tr>`;
-    $('#keyframes table').append(row);
+    DOMInterfaceTable._TABLE.append(row);
   }
 
   _removeRow(rowId) {
@@ -98,8 +106,8 @@ class DOMInterfaceTable {
   _addPolygonRow(polygonId) {
     assertParameters(arguments, Number);
 
-    const rowId = DOMInterfaceTable.POLYGON_ROW_ID(polygonId);
-    const rowContent = DOMInterfaceTable.POLYGON_ROW_CONTENT(polygonId);
+    const rowId = DOMInterfaceTable._POLYGON_ROW_ID(polygonId);
+    const rowContent = DOMInterfaceTable._POLYGON_ROW_CONTENT(polygonId);
     this._addRow(rowId, `keyframe-row`, rowContent, `kf-poly`, (i) => ``);
 
     const newPolygonRow = new DOMInterfaceTablePolygonRow(polygonId, rowId);
@@ -113,15 +121,15 @@ class DOMInterfaceTable {
     this._polygonRows[polygonId].remove();
     delete this._polygonRows[polygonId];
 
-    const rowId = DOMInterfaceTable.POLYGON_ROW_ID(polygonId);
+    const rowId = DOMInterfaceTable._POLYGON_ROW_ID(polygonId);
     this._removeRow(rowId);
   }
 
   _addPolygonPositionRow(polygonId) {
     assertParameters(arguments, Number);
 
-    const rowId = DOMInterfaceTable.POLYGON_POSITION_ROW_ID(polygonId);
-    const rowContent = DOMInterfaceTable.POLYGON_POSITION_ROW_CONTENT(
+    const rowId = DOMInterfaceTable._POLYGON_POSITION_ROW_ID(polygonId);
+    const rowContent = DOMInterfaceTable._POLYGON_POSITION_ROW_CONTENT(
         this._frameModel.getPolygonPosition(polygonId));
     this._addRow(
         rowId, `keyframe-row`, rowContent, `kf-polyposition`, (i) => ``);
@@ -138,7 +146,7 @@ class DOMInterfaceTable {
     this._polygonPositionRows[polygonId].remove();
     delete this._polygonPositionRows[polygonId];
 
-    const rowId = DOMInterfaceTable.POLYGON_POSITION_ROW_ID(polygonId);
+    const rowId = DOMInterfaceTable._POLYGON_POSITION_ROW_ID(polygonId);
     this._removeRow(rowId);
   }
 
@@ -159,6 +167,15 @@ class DOMInterfaceTable {
 
   _changeFrame(frameIndex) {
     assertParameters(arguments, Number);
+
+    const scrollWidth =
+        DOMInterfaceTable._TABLE_SCROLLER.width() -
+        DOMInterfaceTable._PREVIEW_MARGIN_RIGHT;
+    const scrollLeft =
+        frameIndex * DOMInterfaceTable._KEYFRAME_WIDTH - scrollWidth;
+    if (DOMInterfaceTable._TABLE_SCROLLER.scrollLeft() < scrollLeft) {
+      DOMInterfaceTable._TABLE_SCROLLER.scrollLeft(scrollLeft);
+    }
 
     this._gotoRow.currentFrame = frameIndex;
 
@@ -190,25 +207,25 @@ class DOMInterfaceTable {
   }
 };
 
-DOMInterfaceTable.POLYGON_ROW_ID = function(polygonId) {
+DOMInterfaceTable._POLYGON_ROW_ID = function(polygonId) {
   assertParameters(arguments, Number);
 
   return `kf-poly${polygonId}`;
 }
 
-DOMInterfaceTable.POLYGON_POSITION_ROW_ID = function(polygonId) {
+DOMInterfaceTable._POLYGON_POSITION_ROW_ID = function(polygonId) {
   assertParameters(arguments, Number);
 
   return `kf-polyposition${polygonId}`;
 }
 
-DOMInterfaceTable.POLYGON_ROW_CONTENT = function(polygonId) {
+DOMInterfaceTable._POLYGON_ROW_CONTENT = function(polygonId) {
   assertParameters(arguments, Number);
 
   return `Polygon ${polygonId}`;
 };
 
-DOMInterfaceTable.POLYGON_POSITION_ROW_CONTENT = function(coord) {
+DOMInterfaceTable._POLYGON_POSITION_ROW_CONTENT = function(coord) {
   assertParameters(arguments, Coordinate);
 
   const x = coord.x;
@@ -218,3 +235,6 @@ DOMInterfaceTable.POLYGON_POSITION_ROW_CONTENT = function(coord) {
     y <input type="y" value="${y}"></input>
   `;
 };
+
+DOMInterfaceTable._KEYFRAME_WIDTH = 23;
+DOMInterfaceTable._PREVIEW_MARGIN_RIGHT = 100;

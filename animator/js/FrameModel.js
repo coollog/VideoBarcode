@@ -29,6 +29,8 @@ class FrameModel {
   set currentFrame(frameIndex) {
     assertParameters(arguments, Number);
 
+    frameIndex = Math.max(0, Math.min(FrameModel.KEYFRAMES - 1, frameIndex));
+
     this._currentFrame = frameIndex;
 
     Events.dispatch(FrameModel.EVENT_TYPES.CHANGE_FRAME, frameIndex);

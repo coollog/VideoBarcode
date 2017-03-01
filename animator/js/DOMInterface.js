@@ -3,6 +3,7 @@
 // import 'DOMInterfaceTableKeyframeRow'
 // import 'DOMInterfaceTablePolygonRow'
 // import 'Events'
+// import 'Previewer'
 // import 'jquery'
 
 /**
@@ -16,6 +17,9 @@ class DOMInterface {
 
     this._table = new DOMInterfaceTable(frameModel);
 
+    // Stores the current preview controller.
+    this._previewer = null;
+
     $(() => {
       this._activateButtons();
 
@@ -28,6 +32,8 @@ class DOMInterface {
         this._polygonSelected, this);
     Events.on(DOMInterfaceTableKeyframeRow.EVENT_TYPES.DEACTIVATE_ALL,
         this._polygonDeselected, this);
+
+    Events.on(Previewer.EVENT_TYPES.STOP, this._previewStopped, this);
   }
 
   static get BUTTON_ADD_POLYGON() {
@@ -59,6 +65,22 @@ class DOMInterface {
 
     DOMInterface.BUTTON_REMOVE_POLYGON.click(() => {
       this._frameModel.removePolygon(this._table.currentPolygon);
+
+      DOMInterface.BUTTON_REMOVE_POLYGON.addClass('')
+    });
+
+    DOMInterface.BUTTON_PREVIEW.click(() => {
+      const isStop = DOMInterface.BUTTON_PREVIEW.hasClass('stop');
+
+      if (this._previewer !== null) this._previewer.stop();
+
+      if (isStop) {
+        this._previewStopped();
+      } else {
+        this._previewer = (new Previewer(this._frameModel)).start();
+
+        DOMInterface.BUTTON_PREVIEW.html('Stop').addClass('stop');
+      }
     });
 
     DOMInterface.BUTTON_GENERATE_QRCODE.click(() => {
@@ -76,6 +98,10 @@ class DOMInterface {
         correctLevel : QRCode.CorrectLevel.L
       });
     });
+  }
+
+  _previewStopped() {
+    DOMInterface.BUTTON_PREVIEW.html('Preview').removeClass('stop');
   }
 
   _polygonSelected(polygonId) {
