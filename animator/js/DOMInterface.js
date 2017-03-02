@@ -96,9 +96,11 @@ class DOMInterface {
     });
 
     DOMInterface.BUTTON_GENERATE_QRCODE.click(() => {
-      const encoded = (new AnimationEncoder(this._frameModel)).encode();
+      const bits = (new AnimationEncoder(this._frameModel)).encode();
+      const encoded = AnimationEncoder.bitsToString(bits);
       console.log(encoded.length);
       console.log(btoa(encoded));
+      console.log(bits.bits.join(''));
 
       DOMInterface.QRCODE.html('');
       var qrcode = new QRCode(DOMInterface.QRCODE[0], {

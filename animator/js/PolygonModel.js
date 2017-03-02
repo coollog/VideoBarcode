@@ -156,7 +156,7 @@ PolygonModel.Point = class {
     assertParameters(arguments, PolygonModel, Coordinate);
 
     this._polygon = polygon;
-    this._coord = coord;
+    this.coord = coord;
 
     this._nextPoint = null;
     this._prevPoint = null;

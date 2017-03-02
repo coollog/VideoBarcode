@@ -18,6 +18,12 @@ class AnimationEncoder {
     this._frameModel = frameModel;
   }
 
+  static bitsToString(bitBuffer) {
+    assertParameters(arguments, BitBuffer);
+
+    return String.fromCharCode.apply(null, bitBuffer.toUint8Array());
+  }
+
   encode() {
     const bitBuffer = new BitBuffer();
 
@@ -28,8 +34,8 @@ class AnimationEncoder {
 
       for (let coord of coords) {
         // X Y
-        bitBuffer.writeBits(8, coord.x);
-        bitBuffer.writeBits(8, coord.y);
+        bitBuffer.writeBits(8, Math.round(coord.x));
+        bitBuffer.writeBits(8, Math.round(coord.y));
       }
 
       // Get position keyframes.
@@ -43,14 +49,14 @@ class AnimationEncoder {
 
         // X Y
         bitBuffer.writeBits(6, keyframe.frameIndex);
-        bitBuffer.writeBits(8, position.x);
-        bitBuffer.writeBits(8, position.y);
+        bitBuffer.writeBits(8, Math.round(position.x));
+        bitBuffer.writeBits(8, Math.round(position.y));
       }
     }
 
-    // this._checkEncoding(bitBuffer);
+    this._checkEncoding(bitBuffer);
 
-    return String.fromCharCode.apply(null, bitBuffer.toUint8Array());
+    return bitBuffer;
   }
 
   _getPositionKeyframesFor(polygonId) {
@@ -84,8 +90,8 @@ class AnimationEncoder {
       assertEq(coords.length, bitBuffer.readBits(4));
 
       for (let coord of coords) {
-        assertEq(coord.x, bitBuffer.readBits(8));
-        assertEq(coord.y, bitBuffer.readBits(8));
+        assertEq(Math.round(coord.x), bitBuffer.readBits(8));
+        assertEq(Math.round(coord.y), bitBuffer.readBits(8));
       }
 
       // Get position keyframes.
@@ -97,8 +103,8 @@ class AnimationEncoder {
       for (let keyframe of keyframes) {
         // X Y
         assertEq(keyframe.frameIndex, bitBuffer.readBits(6));
-        assertEq(keyframe.position.x, bitBuffer.readBits(8));
-        assertEq(keyframe.position.y, bitBuffer.readBits(8));
+        assertEq(Math.round(keyframe.position.x), bitBuffer.readBits(8));
+        assertEq(Math.round(keyframe.position.y), bitBuffer.readBits(8));
       }
     }
   }

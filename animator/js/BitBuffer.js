@@ -11,8 +11,14 @@ class BitBuffer {
     this._readPosition = 0;
   }
 
+  get bits() {
+    return this._buffer;
+  }
+
   writeBits(nBits, num) {
     assertParameters(arguments, Number, Number);
+
+    assert(Number.isInteger(num) && num >= 0);
 
     assert(num < 1 << nBits);
 
@@ -56,6 +62,10 @@ class BitBuffer {
 
   rewind() {
     this._readPosition = 0;
+  }
+
+  [Symbol.iterator]() {
+    return this._buffer[Symbol.iterator]();
   }
 
   get _readDirection() {
