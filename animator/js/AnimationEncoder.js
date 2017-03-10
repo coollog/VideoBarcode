@@ -25,17 +25,22 @@ class AnimationEncoder {
   }
 
   encode() {
+    let numbers = [];
+
     const bitBuffer = new BitBuffer();
 
     for (let polygon of this._frameModel.polygons) {
       // NUM POINTS
       const coords = polygon.coords;
       bitBuffer.writeBits(4, coords.length);
+      numbers.push(coords.length);
 
       for (let coord of coords) {
         // X Y
         bitBuffer.writeBits(8, Math.round(coord.x));
+        numbers.push(Math.round(coord.x));
         bitBuffer.writeBits(8, Math.round(coord.y));
+        numbers.push(Math.round(coord.y));
       }
 
       // Get position keyframes.
@@ -43,16 +48,22 @@ class AnimationEncoder {
 
       // NUM KEYFRAMES
       bitBuffer.writeBits(6, keyframes.length);
+      numbers.push(keyframes.length);
 
       for (let keyframe of keyframes) {
         const position = this._positionToUnsigned(keyframe.position);
 
         // X Y
         bitBuffer.writeBits(6, keyframe.frameIndex);
+        numbers.push(keyframe.frameIndex);
         bitBuffer.writeBits(8, Math.round(position.x));
+        numbers.push(Math.round(position.x));
         bitBuffer.writeBits(8, Math.round(position.y));
+        numbers.push(Math.round(position.y));
       }
     }
+
+    console.log(numbers)
 
     this._checkEncoding(bitBuffer);
 
@@ -101,10 +112,12 @@ class AnimationEncoder {
       assertEq(keyframes.length, bitBuffer.readBits(6));
 
       for (let keyframe of keyframes) {
+        const position = this._positionToUnsigned(keyframe.position);
+
         // X Y
         assertEq(keyframe.frameIndex, bitBuffer.readBits(6));
-        assertEq(Math.round(keyframe.position.x), bitBuffer.readBits(8));
-        assertEq(Math.round(keyframe.position.y), bitBuffer.readBits(8));
+        assertEq(Math.round(position.x), bitBuffer.readBits(8));
+        assertEq(Math.round(position.y), bitBuffer.readBits(8));
       }
     }
   }

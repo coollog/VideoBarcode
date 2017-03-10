@@ -173,12 +173,12 @@ FrameModel.Frame = class {
       newPosition = this._frameModel.getPolygon(polygonId).position;
     }
 
-    this._frameModel.currentFrame = this._frameIndex;
     this._positionKeyFrames[polygonId] =
         new FrameModel.Frame.PositionKeyFrame(this._frameIndex, newPosition);
-
     Events.dispatch(FrameModel.EVENT_TYPES.ADD_POSITION_KEYFRAME,
         this._frameIndex, polygonId);
+
+    this._frameModel.currentFrame = this._frameIndex;
   }
 
   removePositionKeyFrame(polygonId) {
