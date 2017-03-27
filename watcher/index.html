@@ -1,14 +1,27 @@
 <style>
-  input, button, #chooseanimations {
+html, body {
+    height: 100%;
+    font-family: 'Ubuntu', sans-serif;
+    user-select: none;
+  }
+  * {
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  input, button, .fileLabel {
     font-family: 'Ubuntu Mono', monospace;
     transition: 0.1s all ease-in-out;
     font-size: 1em;
     outline: none;
   }
+  label {
+    display: inline-block;
+  }
   input {
     border: 1px solid #ccc;
   }
-  button, #chooseanimations {
+  button, .fileLabel {
     padding: 0.5em 1em;
     background: #fc0;
     box-shadow: 0 0 10px #999;
@@ -18,43 +31,94 @@
     white-space: nowrap;
     margin-bottom: 1.5em;
   }
-  button:hover, #chooseanimations:hover {
+  button:hover, .fileLabel:hover {
     opacity: 0.5;
   }
-  button:active, #chooseanimations:active {
+  button:active, .fileLabel:active {
     box-shadow: 0 0 5px #222;
     opacity: 1;
   }
-  button:disabled, #chooseanimations.disabled {
+  button:disabled, .fileLabel.disabled {
     background: #dca !important;
   }
   input[type=file] {
     display: none;
   }
+
+  #canvas {
+    border: 1px solid black;
+    outline: none;
+    width: 720;
+    height: 480;
+  }
+  #main {
+    max-width: 720px;
+    margin: 2em auto;
+  }
 </style>
 
-<label id="chooseanimations">
-  <input type="file" id="animationsfile" accept=".csv" />
-  <span id="chooseanimationslabel">Choose Animations</span>
-</label>
+<div id="main">
+  <canvas id="canvas" width="720" height="480" tabindex="1"></canvas>
 
-<div id="choosepolygons"></div>
+  <div id="controls">
+    <label id="chooseanimations" class="fileLabel">
+      <input type="file" id="animationsfile" accept=".csv" />
+      <span id="chooseanimationslabel">Choose Animations</span>
+    </label>
+
+    <div id="choosepolygons"></div>
+
+    <div id="playdiv"></div>
+  </div>
+</div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="papaparse.min.js"></script>
 
 <script src="../animator/js/Assert.js"></script>
+<script src="../animator/js/Coordinate.js"></script>
+<script src="../animator/js/Size.js"></script>
+<script src="../animator/js/Envelope.js"></script>
+<script src="../animator/js/Canvas.js"></script>
+<script src="../animator/js/PriorityQueue.js"></script>
+<script src="../animator/js/Events.js"></script>
+<script src="../animator/js/DrawTimer.js"></script>
 <script src="AnimationModel.js"></script>
+<script src="AnimationController.js"></script>
 
 <script>
+  const playButtonHtml = `<button id="play">Play Animation</button>`;
+
   function getChoosePolygonHtml(polygonId) {
     return `
-      <label class="choosepolygon">
-        <input type="file" polygonId="${polygonId}"
-               class="choosepolygon" accept="image/*" />
-        <span class="choosepolygon">Choose Polygon ${polygonId}</span>
+      <label class="fileLabel choosepolygon">
+        <input type="file" polygonId="${polygonId}" accept="image/*" />
+        <span>Choose Polygon ${polygonId}</span>
       </label>
     `;
+  }
+
+  function initChoosePolygons(animationModel) {
+    $('.choosepolygon input').change(function() {
+      const polygonId = parseInt($(this).attr('polygonId'));
+
+      $(this).parent().addClass('disabled');
+      $(this).attr('disabled', 'disabled');
+      const labelText = $(this).siblings('span').html();
+      $(this).siblings('span').html('Loading...');
+
+      const img = new Image();
+      img.onload = () => {
+        animationModel.setImage(polygonId, img);
+
+        setTimeout(() => {
+          $(this).parent().removeClass('disabled');
+          $(this).removeAttr('disabled');
+          $(this).siblings('span').html(labelText);
+        }, 500);
+      }
+      img.src = URL.createObjectURL(this.files[0]);
+    });
   }
 
   $('#animationsfile').change(function() {
@@ -66,7 +130,28 @@
         console.log("Finished:", results.data);
 
         const animationModel = new AnimationModel(results.data);
+        for (let polygon of animationModel.polygons) {
+          const chooseHtml = getChoosePolygonHtml(polygon.id);
+          $('#choosepolygons').append(chooseHtml);
+        }
+
+        const animationController = new AnimationController(animationModel);
+
+        $('#playdiv').html(playButtonHtml);
+        $('#play').click(function() {
+          animationController.play();
+        });
+
+        initChoosePolygons(animationModel);
       }
     });
+  });
+
+  $(function() {
+    const FPS = 60;
+
+    const canvas = new Canvas('canvas');
+
+    (new DrawTimer(canvas, FPS)).start();
   });
 </script>

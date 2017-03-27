@@ -12,14 +12,16 @@ class AnimationModel {
     assertParameters(arguments, Array);
 
     this._polygons = [];
+    this._images = [];
 
     let rowCounter = 0;
+    let polygonId = 0;
 
     for (let row of csvData) {
       if (row.length != 65) break;
 
       if (rowCounter === 0) { // x row
-        const poly = new AnimationModel.Polygon();
+        const poly = new AnimationModel.Polygon(polygonId);
         this._polygons.push(poly);
 
         poly.xFrames = AnimationModel._parseIntArray(row.slice(1));
@@ -27,10 +29,41 @@ class AnimationModel {
         const poly = this._polygons[this._polygons.length - 1];
 
         poly.yFrames = AnimationModel._parseIntArray(row.slice(1));
+
+        polygonId ++;
       }
 
       rowCounter = (rowCounter + 1) % 2;
     }
+  }
+
+  get polygons() {
+    return this._polygons;
+  }
+
+  hasAllImages() {
+    assertParameters(arguments);
+
+    for (let i = 0; i < this._polygons.length; i ++) {
+      if (i >= this._images.length || this._images[i] === undefined) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  getImage(polygonId) {
+    assertParameters(arguments, Number);
+
+    if (polygonId >= this._images.length) return undefined;
+
+    return this._images[polygonId];
+  }
+
+  setImage(polygonId, image) {
+    assertParameters(arguments, Number, HTMLImageElement);
+
+    this._images[polygonId] = image;
   }
 
   static _parseIntArray(arr) {
@@ -45,12 +78,18 @@ class AnimationModel {
 AnimationModel.FRAMES = 64;
 
 AnimationModel.Polygon = class {
-  constructor() {
-    assertParameters(arguments);
+  constructor(polygonId) {
+    assertParameters(arguments, Number);
+
+    this._polygonId = polygonId;
 
     // Construct the frames.
     this._xFrames = new Array(AnimationModel.FRAMES);
     this._yFrames = new Array(AnimationModel.FRAMES);
+  }
+
+  get id() {
+    return this._polygonId;
   }
 
   get xFrames() {
