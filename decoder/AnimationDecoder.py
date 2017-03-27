@@ -27,7 +27,7 @@ class AnimationDecoder:
 
     self._processPolygons(bits)
 
-  def writeToCsv(self, fname):
+  def writePolygonsToCsv(self, fname):
     with open(fname, 'wb') as csvFile:
       csvWriter = csv.writer(csvFile)
 
@@ -42,6 +42,14 @@ class AnimationDecoder:
           polyRow.append(point.y)
 
         csvWriter.writerow(polyRow)
+
+  def writeAnimationsToCsv(self, fname):
+    with open(fname, 'wb') as csvFile:
+      csvWriter = csv.writer(csvFile)
+
+      for polygon in self._polygons:
+        for row in polygon.animationRows:
+          csvWriter.writerow(row)
 
   def _processPolygons(self, bitStream):
     polygon = True
@@ -79,15 +87,15 @@ class AnimationDecoder:
     for i in range(numKeyframes):
       frameIndex = bitStream.read(6)
       numbers.append(frameIndex)
-      positionX = bitStream.read(8)
+      positionX = bitStream.read(8) - 128
       numbers.append(positionX)
-      positionY = bitStream.read(8)
+      positionY = bitStream.read(8) - 128
       numbers.append(positionY)
 
       if firstPosition is None:
-        firstPosition = (positionX - 128, positionY - 128)
+        firstPosition = (positionX, positionY)
 
-      # TODO: Add these to a frame model.
+      polygon.addPosition(frameIndex, positionX, positionY)
 
     if firstPosition is not None:
       for point in polygon.points:
@@ -103,14 +111,29 @@ class Polygon:
   def __init__(self):
     self._points = []
 
+    self._positionXFrames = AnimationFrames('x')
+    self._positionYFrames = AnimationFrames('y')
+
+
   def addPoint(self, point):
     assert isinstance(point, PolygonPoint)
 
     self._points.append(point)
 
+  def addPosition(self, frameIndex, x, y):
+    self._positionXFrames.setVal(frameIndex, x)
+    self._positionYFrames.setVal(frameIndex, y)
+
   @property
   def points(self):
     return self._points
+
+  @property
+  def animationRows(self):
+    return [
+      self._positionXFrames.asRow,
+      self._positionYFrames.asRow
+    ]
 
   def __str__(self):
     s = 'Polygon with %d points: ' % len(self._points)
@@ -142,6 +165,24 @@ class PolygonPoint:
   def __str__(self):
     return '[%d,%d]' % (self._x, self._y)
 
-decoder = AnimationDecoder()
-decoder.decode('qr6.png')
-decoder.writeToCsv('poly1.csv')
+
+class AnimationFrames:
+  FRAMES = 64
+
+  def __init__(self, name):
+    self._name = name
+
+    self._vals = [None] * AnimationFrames.FRAMES
+
+  @property
+  def name(self):
+    return self._name
+
+  @property
+  def asRow(self):
+    return [self._name] + self._vals
+
+  def setVal(self, frameIndex, val):
+    assert(frameIndex < AnimationFrames.FRAMES)
+
+    self._vals[frameIndex] = val

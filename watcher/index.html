@@ -1,0 +1,72 @@
+<style>
+  input, button, #chooseanimations {
+    font-family: 'Ubuntu Mono', monospace;
+    transition: 0.1s all ease-in-out;
+    font-size: 1em;
+    outline: none;
+  }
+  input {
+    border: 1px solid #ccc;
+  }
+  button, #chooseanimations {
+    padding: 0.5em 1em;
+    background: #fc0;
+    box-shadow: 0 0 10px #999;
+    border: none;
+    cursor: pointer;
+    margin-right: 1em;
+    white-space: nowrap;
+    margin-bottom: 1.5em;
+  }
+  button:hover, #chooseanimations:hover {
+    opacity: 0.5;
+  }
+  button:active, #chooseanimations:active {
+    box-shadow: 0 0 5px #222;
+    opacity: 1;
+  }
+  button:disabled, #chooseanimations.disabled {
+    background: #dca !important;
+  }
+  input[type=file] {
+    display: none;
+  }
+</style>
+
+<label id="chooseanimations">
+  <input type="file" id="animationsfile" accept=".csv" />
+  <span id="chooseanimationslabel">Choose Animations</span>
+</label>
+
+<div id="choosepolygons"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="papaparse.min.js"></script>
+
+<script src="../animator/js/Assert.js"></script>
+<script src="AnimationModel.js"></script>
+
+<script>
+  function getChoosePolygonHtml(polygonId) {
+    return `
+      <label class="choosepolygon">
+        <input type="file" polygonId="${polygonId}"
+               class="choosepolygon" accept="image/*" />
+        <span class="choosepolygon">Choose Polygon ${polygonId}</span>
+      </label>
+    `;
+  }
+
+  $('#animationsfile').change(function() {
+    const file = this.files[0];
+
+    // Parse local CSV file.
+    Papa.parse(file, {
+      complete: function(results) {
+        console.log("Finished:", results.data);
+
+        const animationModel = new AnimationModel(results.data);
+      }
+    });
+  });
+</script>
