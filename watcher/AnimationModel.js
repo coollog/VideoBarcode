@@ -13,6 +13,7 @@ class AnimationModel {
 
     this._objects = [];
     this._images = [];
+    this._backgroundImage = undefined;
 
     let rowCounter = 0;
     let objectId = 0;
@@ -41,6 +42,10 @@ class AnimationModel {
     return this._objects;
   }
 
+  get backgroundImage() {
+    return this._backgroundImage;
+  }
+
   hasAllImages() {
     assertParameters(arguments);
 
@@ -64,6 +69,18 @@ class AnimationModel {
     assertParameters(arguments, Number, HTMLImageElement);
 
     this._images[objectId] = image;
+  }
+
+  hasBackground() {
+    assertParameters(arguments);
+
+    return this._backgroundImage !== undefined;
+  }
+
+  setBackground(image) {
+    assertParameters(arguments, HTMLImageElement);
+
+    this._backgroundImage = image;
   }
 
   static _parseIntArray(arr) {
@@ -112,12 +129,25 @@ AnimationModel.Object = class {
   xAtFrame(frameIndex) {
     assertParameters(arguments, Number);
 
-    return this._xFrames[frameIndex];
+    return AnimationModel.Object._interpolateBetween(this._xFrames, frameIndex);
   }
   yAtFrame(frameIndex) {
     assertParameters(arguments, Number);
 
-    return this._yFrames[frameIndex];
+    return AnimationModel.Object._interpolateBetween(this._yFrames, frameIndex);
+  }
+
+  static _interpolateBetween(values, frameIndex) {
+    assertParameters(arguments, Array, Number);
+
+    const progress = frameIndex % 1;
+
+    const firstFrame = Math.floor(frameIndex);
+
+    const first = values[firstFrame];
+    const second = values[firstFrame + 1];
+
+    return (second - first) * progress + first;
   }
 
   static _interpolateFrames(frames) {

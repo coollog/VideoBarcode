@@ -66,6 +66,8 @@ html, body {
       <span id="chooseanimationslabel">Choose Animations</span>
     </label>
 
+    <div id="choosebgdiv"></div>
+
     <div id="chooseobjects"></div>
 
     <div id="playdiv"></div>
@@ -94,14 +96,14 @@ html, body {
     return `
       <label class="fileLabel chooseobject">
         <input type="file" objectId="${objectId}" accept="image/*" />
-        <span>Choose Object ${objectId} Image</span>
+        <span>Choose Object ${objectId + 1} Image</span>
       </label>
     `;
   }
 
-  function initChooseObjects(animationModel) {
-    $('.chooseobject input').change(function() {
-      const objectId = parseInt($(this).attr('objectId'));
+  function initChooseImage(selector, onloadFn) {
+    $(selector).change(function() {
+      const curElem = this;
 
       $(this).parent().addClass('disabled');
       $(this).attr('disabled', 'disabled');
@@ -110,7 +112,7 @@ html, body {
 
       const img = new Image();
       img.onload = () => {
-        animationModel.setImage(objectId, img);
+        onloadFn(img, curElem);
 
         setTimeout(() => {
           $(this).parent().removeClass('disabled');
@@ -122,15 +124,40 @@ html, body {
     });
   }
 
+  function initChooseObjects(animationModel) {
+    initChooseImage('.chooseobject input', function(img, curElem) {
+      const objectId = parseInt($(curElem).attr('objectId'));
+      animationModel.setImage(objectId, img);
+    });
+  }
+
+  function initChooseBackground(animationModel) {
+    const chooseHtml = `
+      <label id="choosebackground" class="fileLabel">
+        <input type="file" id="backgroundfile" accept="image/*" />
+        <span id="choosebackgroundlabel">Choose Background</span>
+      </label>`;
+    $('#choosebgdiv').append(chooseHtml);
+
+    initChooseImage('#backgroundfile', function(img, curElem) {
+      animationModel.setBackground(img);
+    });
+  }
+
+  // TODO: Reset everything for new animation.
+
   $('#animationsfile').change(function() {
     const file = this.files[0];
 
     // Parse local CSV file.
     Papa.parse(file, {
       complete: function(results) {
-        // console.log("Finished:", results.data);
+        console.log("Finished:", results.data);
 
         const animationModel = new AnimationModel(results.data);
+
+        initChooseBackground(animationModel);
+
         for (let object of animationModel.objects) {
           const chooseHtml = getChooseObjectHtml(object.id);
           $('#chooseobjects').append(chooseHtml);

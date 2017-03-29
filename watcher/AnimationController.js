@@ -77,7 +77,22 @@ class AnimationController {
     assertParameters(arguments, Canvas);
 
     if (this._playing) {
-      this._curFrame = (this._curFrame + 1) % AnimationModel.FRAMES;
+      this._curFrame =
+          (this._curFrame + AnimationController._PLAY_SPEED) %
+          AnimationModel.FRAMES;
+    }
+
+    // Draw the background.
+    if (this._animationModel.hasBackground()) {
+      const image = this._animationModel.backgroundImage;
+
+      const coord =
+          AnimationController.Stage._scaleToStage(new Coordinate(0, 0), canvas);
+      const stageSize = AnimationController.Stage._getSize(canvas);
+      const xScale = stageSize / image.width;
+      const yScale = stageSize / image.height;
+
+      canvas.drawImage(image, coord, xScale, yScale);
     }
 
     // Draw the objects.
@@ -90,8 +105,9 @@ class AnimationController {
       const y = object.yAtFrame(this._curFrame);
       const coord =
           AnimationController.Stage._scaleToStage(new Coordinate(x, y), canvas);
-      const xScale = AnimationController._ANIMATION_SIZE / image.width;
-      const yScale = AnimationController._ANIMATION_SIZE / image.height;
+      const stageSize = AnimationController.Stage._getSize(canvas);
+      const xScale = stageSize / image.width;
+      const yScale = stageSize / image.height;
       canvas.drawImage(image, coord, xScale, yScale);
     }
 
@@ -114,9 +130,9 @@ AnimationController.Stage = class {
     assertParameters(arguments, Coordinate, Canvas);
 
     // Move to center.
-    coord = coord.translate(new Coordinate(
-        AnimationController._ANIMATION_SIZE / 2,
-        AnimationController._ANIMATION_SIZE / 2));
+    // coord = coord.translate(new Coordinate(
+    //     AnimationController._ANIMATION_SIZE / 2,
+    //     AnimationController._ANIMATION_SIZE / 2));
 
     // Scale to contain.
     const stageSize = AnimationController.Stage._getSize(canvas);
@@ -147,6 +163,7 @@ AnimationController.Stage = class {
   }
 }
 
+AnimationController._PLAY_SPEED = 0.2;
 AnimationController._ANIMATION_SIZE = 256;
 AnimationController._BORDER_COLOR = '#ddd';
 AnimationController._PROGRESS_COLOR = '#f55';
