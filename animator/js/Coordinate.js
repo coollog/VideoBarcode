@@ -37,6 +37,13 @@ class Coordinate {
   get magnitude() {
     return Math.sqrt(this._x * this._x + this._y * this._y);
   }
+  get angle() {
+    return Math.atan2(this._y, this._x);
+  }
+
+  negate() {
+    return new Coordinate(-this._x, -this._y);
+  }
 
   // Calculate distance to 'other' Coordinate.
   distanceTo(other) {
@@ -53,7 +60,7 @@ class Coordinate {
 
     const yDiff = this._y - other.y;
     const xDiff = other.x - this._x;
-    return (Math.atan2(yDiff, xDiff) + 2 * Math.PI) % (2 * Math.PI);
+    return Math.atan2(yDiff, xDiff) + 2 * Math.PI;
   }
 
   // Returns copy translated by 'other'.
@@ -61,6 +68,15 @@ class Coordinate {
     assertParameters(arguments, Coordinate);
 
     return new Coordinate(this._x + other.x, this._y + other.y);
+  }
+
+  // Returns copy translated by vector with 'angle' and 'magnitude'.
+  translateVector(angle, magnitude) {
+    assertParameters(arguments, Number, Number);
+
+    return new Coordinate(
+        this._x + magnitude * Math.cos(angle),
+        this._y + magnitude * Math.sin(angle));
   }
 
   // Returns copy subtracted by 'other'.
@@ -75,6 +91,16 @@ class Coordinate {
     assertParameters(arguments, Number, [Number, undefined]);
 
     return new Coordinate(this._x * magnitudeX, this._y * magnitudeY);
+  }
+
+  // Returns copy rotated by 'radians' about the origin.
+  rotate(radians) {
+    assertParameters(arguments, Number);
+
+    const magnitude = this.magnitude;
+    const angle = this.angle + radians;
+
+    return (new Coordinate(0, 0)).translateVector(angle, magnitude);
   }
 
   // Returns true if coordinate is within rectangle defined by the two

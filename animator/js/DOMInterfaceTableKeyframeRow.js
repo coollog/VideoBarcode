@@ -32,6 +32,12 @@ class DOMInterfaceTableKeyframeRow extends DOMInterfaceTableRow {
         .filter(`[index=${frameIndex}]`).addClass('current');
   }
 
+  hasKeyframe(frameIndex) {
+    assertParameters(arguments, Number);
+
+    return $(this._cells.get(frameIndex)).hasClass('keyframe');
+  }
+
   addKeyframe(frameIndex) {
     assertParameters(arguments, Number);
 

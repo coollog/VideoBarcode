@@ -9,11 +9,12 @@
  *       Should prob calculate nearest MIDPOINT on EDGE.
  */
 class PolygonModel {
-  constructor(id, getPositionFn) {
-    assertParameters(arguments, Number, Function);
+  constructor(id, getPositionFn, getRotationFn) {
+    assertParameters(arguments, Number, Function, Function);
 
     this._id = id;
     this._getPositionFn = getPositionFn;
+    this._getRotationFn = getRotationFn;
 
     this._firstPoint = null;
   }
@@ -24,6 +25,19 @@ class PolygonModel {
 
   get position() {
     return this._getPositionFn();
+  }
+  get rotation() {
+    return this._getRotationFn();
+  }
+
+  get center() {
+    let center = new Coordinate(0, 0);
+    let numPoints = 0;
+    for (let pt of this.points) {
+      center = center.translate(pt.coord);
+      numPoints ++;
+    }
+    return center.scale(1 / numPoints).translate(this.position);
   }
 
   get coords() {
@@ -248,4 +262,4 @@ PolygonModel.Point._BOUND_TOP_LEFT = new Coordinate(0, 0);
 PolygonModel.Point._BOUND_BOTTOM_RIGHT = new Coordinate(255, 255);
 
 PolygonModel.START_POSITION = new Coordinate(0, 0);
-
+PolygonModel.START_ROTATION = Angle.fromRadians(0);

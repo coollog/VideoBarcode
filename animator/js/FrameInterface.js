@@ -2,6 +2,7 @@
 // import 'Controller'
 // import 'DOMInterface'
 // import 'DOMInterfaceTablePolygonPositionRow'
+// import 'DOMInterfaceTablePolygonRotationRow'
 // import 'DOMInterfaceTablePolygonRow'
 // import 'DOMInterfaceTableRow'
 // import 'FrameModel'
@@ -53,8 +54,19 @@ class FrameInterface {
     Events.on(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.REMOVE_KEYFRAME,
         this._removePositionKeyframe, this);
 
+    Events.on(DOMInterfaceTablePolygonRotationRow.EVENT_TYPES.ACTIVATE,
+        this._startRotatingPolygon, this);
+    Events.on(DOMInterfaceTablePolygonRotationRow.EVENT_TYPES.CHANGE,
+        this._polygonRotationChanged, this);
+    Events.on(DOMInterfaceTablePolygonRotationRow.EVENT_TYPES.ADD_KEYFRAME,
+        this._addRotationKeyframe, this);
+    Events.on(DOMInterfaceTablePolygonRotationRow.EVENT_TYPES.REMOVE_KEYFRAME,
+        this._removeRotationKeyframe, this);
+
     Events.on(PolygonInterface.EVENT_TYPES.MOVE,
         this._polygonPositionChanged, this);
+    Events.on(PolygonInterface.EVENT_TYPES.ROTATE,
+        this._polygonRotationChanged, this);
 
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._draw, this);
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._drawOverlay, this, 100);
@@ -134,6 +146,12 @@ class FrameInterface {
     this._polygonInterfaces[polygonId].startMoving();
   }
 
+  _startRotatingPolygon(polygonId) {
+    assertParameters(arguments, Number);
+
+    this._polygonInterfaces[polygonId].startRotating();
+  }
+
   _addKeyframe(polygonId, frameIndex) {
     this._frameModel.getFrame(frameIndex).addKeyFrame(polygonId);
   }
@@ -148,6 +166,14 @@ class FrameInterface {
 
   _removePositionKeyframe(polygonId, frameIndex) {
     this._frameModel.getFrame(frameIndex).removePositionKeyFrame(polygonId);
+  }
+
+  _addRotationKeyframe(polygonId, frameIndex) {
+    this._frameModel.getFrame(frameIndex).addRotationKeyFrame(polygonId);
+  }
+
+  _removeRotationKeyframe(polygonId, frameIndex) {
+    this._frameModel.getFrame(frameIndex).removeRotationKeyFrame(polygonId);
   }
 
   _deactivatePolygons() {
@@ -187,6 +213,16 @@ class FrameInterface {
         polygonId, newPosition);
 
     // this._frameModel.getPolygon(polygonId).position = newPosition;
+  }
+
+  _polygonRotationChanged(polygonId, newRotation) {
+    assertParameters(arguments, Number, Angle);
+
+    // Make keyframe.
+    this._frameModel.currentFrame.addRotationKeyFrame(
+        polygonId, newRotation);
+
+    // this._frameModel.getPolygon(polygonId).rotation = newRotation;
   }
 
   _selectImage(image) {

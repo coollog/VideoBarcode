@@ -1,5 +1,5 @@
 // import 'Assert'
-// import 'Coordinate'
+// import 'Angle'
 // import 'DOMInterfaceTableKeyframeRow'
 // import 'Events'
 // import 'FrameModel'
@@ -8,7 +8,7 @@
 /**
  * Sets up and controls a row for a polygon.
  */
-class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
+class DOMInterfaceTablePolygonRotationRow extends DOMInterfaceTableKeyframeRow {
   constructor(polygonId, rowId, active = true) {
     assertParameters(arguments, Number, String, [Boolean, undefined]);
 
@@ -17,18 +17,14 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
     this.activate();
   }
 
-  changePosition(coord) {
-    assertParameters(arguments, Coordinate);
+  changeRotation(angle) {
+    assertParameters(arguments, Angle);
 
-    this._inputX.val(Math.round(coord.x));
-    this._inputY.val(Math.round(coord.y));
+    this._inputAngle.val(Math.round(angle.degrees));
   }
 
-  get _inputX() {
-    return this._headColElem.children('input[type=x]');
-  }
-  get _inputY() {
-    return this._headColElem.children('input[type=y]');
+  get _inputAngle() {
+    return this._headColElem.children('input');
   }
 
   _setupDOM(active) {
@@ -49,7 +45,7 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
     // this.addKeyframe(frameIndex);
 
     Events.dispatch(
-        DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.ADD_KEYFRAME,
+        DOMInterfaceTablePolygonRotationRow.EVENT_TYPES.ADD_KEYFRAME,
         this._polygonId,
         frameIndex);
   }
@@ -58,7 +54,7 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
     assertParameters(arguments, Number);
 
     Events.dispatch(
-        DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.REMOVE_KEYFRAME,
+        DOMInterfaceTablePolygonRotationRow.EVENT_TYPES.REMOVE_KEYFRAME,
         this._polygonId,
         frameIndex);
   }
@@ -74,27 +70,26 @@ class DOMInterfaceTablePolygonPositionRow extends DOMInterfaceTableKeyframeRow {
   _inputChanged() {
     assertParameters(arguments, undefined);
 
-    const x = parseInt(this._inputX.val());
-    const y = parseInt(this._inputY.val());
-    const coord = new Coordinate(x, y);
+    const degrees = parseInt(this._inputAngle.val());
+    const angle = Angle.fromDegrees(degrees);
 
     Events.dispatch(
-        DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.CHANGE,
+        DOMInterfaceTablePolygonRotationRow.EVENT_TYPES.CHANGE,
         this._polygonId,
-        coord);
+        angle);
   }
 
   _dispatchActivateEvent() {
     assertParameters(arguments);
 
-    Events.dispatch(DOMInterfaceTablePolygonPositionRow.EVENT_TYPES.ACTIVATE,
+    Events.dispatch(DOMInterfaceTablePolygonRotationRow.EVENT_TYPES.ACTIVATE,
         this._polygonId);
   }
 };
 
-DOMInterfaceTablePolygonPositionRow.EVENT_TYPES = {
-  ACTIVATE: 'domiftblpolyposrow-activate',
-  CHANGE: 'domiftblpolyposrow-change',
-  ADD_KEYFRAME: 'domiftblpolyposrow-addkeyframe',
-  REMOVE_KEYFRAME: 'domiftblpolyposrow-removekeyframe'
+DOMInterfaceTablePolygonRotationRow.EVENT_TYPES = {
+  ACTIVATE: 'domiftblpolyrotrow-activate',
+  CHANGE: 'domiftblpolyrotrow-change',
+  ADD_KEYFRAME: 'domiftblpolyrotrow-addkeyframe',
+  REMOVE_KEYFRAME: 'domiftblpolyrotrow-removekeyframe'
 };

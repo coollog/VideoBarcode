@@ -1,0 +1,27 @@
+<canvas id="c" width="800" height="600" style="border: 1px solid black"></canvas>
+<img id="i" src="test.png" />
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<script>
+
+$(function() {
+  var c = document.getElementById("c");
+  var context = c.getContext("2d");
+  var img = document.getElementById("i");
+
+  dest = [100, 100];
+  angle = 50;
+  origin = [128, 128];
+  scale = [2, 2];
+
+
+  context.translate(dest[0] + origin[0], dest[1] + origin[1]);
+  context.rotate(angle);
+  context.translate(-origin[0], -origin[1]);
+  context.scale(...scale);
+  context.drawImage(img, 0, 0);
+
+});
+
+</script>

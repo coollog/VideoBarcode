@@ -21,20 +21,35 @@ class AnimationModel {
     for (let row of csvData) {
       if (row.length != 65) break;
 
-      if (rowCounter === 0) { // x row
+      switch (rowCounter) {
+
+      case 0: { // x row
         const object = new AnimationModel.Object(objectId);
         this._objects.push(object);
 
-        object.xFrames = AnimationModel._parseIntArray(row.slice(1));
-      } else { // y row
-        const object = this._objects[this._objects.length - 1];
-
-        object.yFrames = AnimationModel._parseIntArray(row.slice(1));
-
-        objectId ++;
+        object.xFrames = AnimationModel._parseArray(row.slice(1), parseInt);
+        break;
       }
 
-      rowCounter = (rowCounter + 1) % 2;
+      case 1: { // y row
+        const object = this._objects[this._objects.length - 1];
+
+        object.yFrames = AnimationModel._parseArray(row.slice(1), parseInt);
+        break;
+      }
+
+      case 2: { // rotation row
+        const object = this._objects[this._objects.length - 1];
+
+        object.rotationFrames =
+            AnimationModel._parseArray(row.slice(1), parseFloat);
+
+        objectId ++;
+        break;
+      }
+      }
+
+      rowCounter = (rowCounter + 1) % 3;
     }
   }
 
@@ -44,6 +59,24 @@ class AnimationModel {
 
   get backgroundImage() {
     return this._backgroundImage;
+  }
+
+  addPolygonData(csvData) {
+    assertParameters(arguments, Array);
+
+    for (let i = 0; i < this._objects.length; i ++) {
+      const row = csvData[i];
+
+      const numPoints = row[0];
+      const coords = [];
+      for (let j = 0; j < numPoints; j ++) {
+        const x = parseInt(row[2 * j + 1]);
+        const y = parseInt(row[2 * j + 2]);
+        coords.push(new Coordinate(x, y));
+      }
+
+      this._objects[i].coords = coords;
+    }
   }
 
   hasAllImages() {
@@ -83,12 +116,10 @@ class AnimationModel {
     this._backgroundImage = image;
   }
 
-  static _parseIntArray(arr) {
-    assertParameters(arguments, Array);
+  static _parseArray(arr, parserFn) {
+    assertParameters(arguments, Array, Function);
 
-    return arr.map(function(x) {
-      return parseInt(x);
-    });
+    return arr.map(parserFn);
   }
 };
 
@@ -103,6 +134,20 @@ AnimationModel.Object = class {
     // Construct the frames.
     this._xFrames = new Array(AnimationModel.FRAMES);
     this._yFrames = new Array(AnimationModel.FRAMES);
+    this._rotationFrames = new Array(AnimationModel.FRAMES);
+
+    this._coords = [];
+  }
+
+  static _linearInterpolate(startVal, endVal, portion) {
+    return portion * (endVal - startVal) + startVal;
+  }
+
+  static _angularInterpolate(startVal, endVal, portion) {
+    const portionDiff = (endVal - startVal) * portion;
+    const angleDiff = Math.atan2(Math.sin(portionDiff), Math.cos(portionDiff));
+
+    return startVal + angleDiff;
   }
 
   get id() {
@@ -115,17 +160,48 @@ AnimationModel.Object = class {
   get yFrames() {
     return this._yFrames;
   }
+  get rotationFrames() {
+    return this._rotationFrames;
+  }
   set xFrames(xFrames) {
     assertParameters(arguments, Array);
 
-    this._xFrames = AnimationModel.Object._interpolateFrames(xFrames);
+    this._xFrames = AnimationModel.Object._interpolateFrames(
+        xFrames, AnimationModel.Object._linearInterpolate);
   }
   set yFrames(yFrames) {
     assertParameters(arguments, Array);
 
-    this._yFrames = AnimationModel.Object._interpolateFrames(yFrames);
+    this._yFrames = AnimationModel.Object._interpolateFrames(
+        yFrames, AnimationModel.Object._linearInterpolate);
+  }
+  set rotationFrames(rotationFrames) {
+    assertParameters(arguments, Array);
+
+    this._rotationFrames = AnimationModel.Object._interpolateFrames(
+        rotationFrames, AnimationModel.Object._angularInterpolate);
   }
 
+  set coords(coords) {
+    assertParameters(arguments, Array);
+
+    this._coords = coords;
+  }
+
+  centerAtFrame(frameIndex) {
+    assertParameters(arguments, Number);
+
+    const position =
+        new Coordinate(this.xAtFrame(frameIndex), this.yAtFrame(frameIndex));
+
+    let center = new Coordinate(0, 0);
+    let numPoints = 0;
+    for (let coord of this._coords) {
+      center = center.translate(coord);
+      numPoints ++;
+    }
+    return center.scale(1 / numPoints).translate(position);
+  }
   xAtFrame(frameIndex) {
     assertParameters(arguments, Number);
 
@@ -136,9 +212,17 @@ AnimationModel.Object = class {
 
     return AnimationModel.Object._interpolateBetween(this._yFrames, frameIndex);
   }
+  rotationAtFrame(frameIndex) {
+    assertParameters(arguments, Number);
+
+    return AnimationModel.Object._interpolateBetween(
+        this._rotationFrames, frameIndex);
+  }
 
   static _interpolateBetween(values, frameIndex) {
     assertParameters(arguments, Array, Number);
+
+    if (frameIndex === values.length - 1) return values[frameIndex];
 
     const progress = frameIndex % 1;
 
@@ -150,7 +234,9 @@ AnimationModel.Object = class {
     return (second - first) * progress + first;
   }
 
-  static _interpolateFrames(frames) {
+  static _interpolateFrames(frames, interpFn) {
+    assertParameters(arguments, Array, Function);
+
     // Find each start-end of keyframes and interpolate frames in-between.
     for (let start = 0; start < AnimationModel.FRAMES; start ++) {
       const startVal = frames[start];
@@ -185,7 +271,7 @@ AnimationModel.Object = class {
 
           for (let i = start + 1; i < end; i ++) {
             const portion = (i - start) / (end - start);
-            const setVal = portion * (endVal - startVal) + startVal;
+            const setVal = interpFn(startVal, endVal, portion);
             frames[i] = setVal;
           }
         }

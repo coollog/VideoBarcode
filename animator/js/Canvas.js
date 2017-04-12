@@ -127,10 +127,10 @@ class Canvas {
         [Number, undefined], [Coordinate, undefined], [Number, undefined]);
 
     this._context.save();
-    this._context.translate(...destCoord);
-    this._context.scale(scaleX, scaleY);
+    this._context.translate(...destCoord.translate(originCoord));
     this._context.rotate(angle);
-    this._context.translate(...originCoord);
+    this._context.translate(...originCoord.negate());
+    this._context.scale(scaleX, scaleY);
     this._context.drawImage(img, 0, 0);
     this._context.restore();
   }
@@ -220,5 +220,7 @@ Canvas.RECTANGLE_TYPE = {
 
 Canvas.CURSOR_TYPE = {
   DEFAULT: 'default',
-  MOVE: 'move'
+  MOVE: 'move',
+  ROTATE: '-webkit-grab',
+  ROTATING: '-webkit-grabbing'
 };

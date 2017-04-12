@@ -13,7 +13,7 @@ class AnimationController {
     this._animationModel = animationModel;
 
     this._playing = false;
-    this._curFrame = 0;
+    this._curProgress = 0;
 
     Events.on(DrawTimer.EVENT_TYPES.DRAW, this._draw, this);
   }
@@ -28,7 +28,11 @@ class AnimationController {
   }
   stop() {
     this._playing = false;
-    this._curFrame = 0;
+    this._curProgress = 0;
+  }
+
+  get _curFrame() {
+    return Math.min(AnimationModel.FRAMES - 1, this._curProgress);
   }
 
   _drawBorder(canvas) {
@@ -77,9 +81,9 @@ class AnimationController {
     assertParameters(arguments, Canvas);
 
     if (this._playing) {
-      this._curFrame =
-          (this._curFrame + AnimationController._PLAY_SPEED) %
-          AnimationModel.FRAMES;
+      this._curProgress =
+          (this._curProgress + AnimationController._PLAY_SPEED) %
+          (AnimationModel.FRAMES + AnimationController._FRAMES_AT_END);
     }
 
     // Draw the background.
@@ -103,12 +107,19 @@ class AnimationController {
 
       const x = object.xAtFrame(this._curFrame);
       const y = object.yAtFrame(this._curFrame);
+      const rotation = object.rotationAtFrame(this._curFrame);
+      const center = object.centerAtFrame(this._curFrame);
       const coord =
           AnimationController.Stage._scaleToStage(new Coordinate(x, y), canvas);
+      const centerCoord =
+          AnimationController.Stage._scaleToStage(center, canvas);
       const stageSize = AnimationController.Stage._getSize(canvas);
       const xScale = stageSize / image.width;
       const yScale = stageSize / image.height;
-      canvas.drawImage(image, coord, xScale, yScale);
+
+      console.log('center', centerCoord);
+      console.log('rotation', rotation);
+      canvas.drawImage(image, coord, xScale, yScale, centerCoord, rotation);
     }
 
     // Mask out non-stage areas.
@@ -128,11 +139,6 @@ AnimationController.Stage = class {
 
   static _scaleToStage(coord, canvas) {
     assertParameters(arguments, Coordinate, Canvas);
-
-    // Move to center.
-    // coord = coord.translate(new Coordinate(
-    //     AnimationController._ANIMATION_SIZE / 2,
-    //     AnimationController._ANIMATION_SIZE / 2));
 
     // Scale to contain.
     const stageSize = AnimationController.Stage._getSize(canvas);
@@ -163,6 +169,7 @@ AnimationController.Stage = class {
   }
 }
 
+AnimationController._FRAMES_AT_END = 20;
 AnimationController._PLAY_SPEED = 0.2;
 AnimationController._ANIMATION_SIZE = 256;
 AnimationController._BORDER_COLOR = '#ddd';

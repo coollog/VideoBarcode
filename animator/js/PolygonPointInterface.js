@@ -55,7 +55,15 @@ class PolygonPointInterface {
     assertParameters(arguments, Canvas);
 
     const positionedCoord = this._point.coord.translate(this._polygon.position);
-    return this._scaleCoord(positionedCoord, canvas.width, canvas.height);
+
+    // Add rotation.
+    const distFromCenter = this._polygon.center.distanceTo(positionedCoord);
+    const angleFromCenter = -this._polygon.center.angleTo(positionedCoord);
+    const rotatedAngle = angleFromCenter - this._polygon.rotation.radians;
+    const rotatedCoord =
+        this._polygon.center.translateVector(rotatedAngle, distFromCenter);
+
+    return this._scaleCoord(rotatedCoord, canvas.width, canvas.height);
   }
 
   _onHover(mousePosition, canvas) {
@@ -103,7 +111,14 @@ class PolygonPointInterface {
     const inverseScaledCoord =
         this._inverseScaleCoord(coord, canvas.width, canvas.height);
 
-    this._point.coord = inverseScaledCoord.subtract(this._polygon.position);
+    // Subtract rotation.
+    const distFromCenter = this._polygon.center.distanceTo(inverseScaledCoord);
+    const angleFromCenter = -this._polygon.center.angleTo(inverseScaledCoord);
+    const rotatedAngle = angleFromCenter + this._polygon.rotation.radians;
+    const rotatedCoord =
+        this._polygon.center.translateVector(rotatedAngle, distFromCenter);
+
+    this._point.coord = rotatedCoord.subtract(this._polygon.position);
   }
 
   _onDragEnd(mousePosition, canvas) {

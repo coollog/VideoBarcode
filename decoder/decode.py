@@ -1,6 +1,6 @@
 from AnimationDecoder import AnimationDecoder
 
 decoder = AnimationDecoder()
-decoder.decode('qr8.png')
-decoder.writePolygonsToCsv('poly2.csv')
-decoder.writeAnimationsToCsv('anim2.csv')
+decoder.decode('qrrot2.png')
+decoder.writePolygonsToCsv('polyrot2.csv')
+decoder.writeAnimationsToCsv('animrot2.csv')

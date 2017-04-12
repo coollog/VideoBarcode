@@ -54,6 +54,14 @@ class PolygonInterface {
     this._state = PolygonInterface._STATES.MOVING;
   }
 
+  startRotating() {
+    assertParameters(arguments);
+
+    canvas.setCursorFor(this, Canvas.CURSOR_TYPE.ROTATE, 100);
+
+    this._state = PolygonInterface._STATES.ROTATING;
+  }
+
   deactivate() {
     assertParameters(arguments);
 
@@ -82,7 +90,7 @@ class PolygonInterface {
 
     Events.off(DrawTimer.EVENT_TYPES.DRAW, this);
 
-    assertEq(true, Events.hasNoneForOwner(this));
+    assert(Events.hasNoneForOwner(this));
   }
 
   get _scaledCoords() {
@@ -91,7 +99,15 @@ class PolygonInterface {
     let scaledCoords = [];
     for (let coord of this._polygon.coords) {
       const positionedCoord = coord.translate(this._polygon.position);
-      scaledCoords.push(this._scaleCoordCanvas(positionedCoord, canvas));
+
+      // Add rotation.
+      const distFromCenter = this._polygon.center.distanceTo(positionedCoord);
+      const angleFromCenter = -this._polygon.center.angleTo(positionedCoord);
+      const rotatedAngle = angleFromCenter - this._polygon.rotation.radians;
+      const rotatedCoord =
+          this._polygon.center.translateVector(rotatedAngle, distFromCenter);
+
+      scaledCoords.push(this._scaleCoordCanvas(rotatedCoord, canvas));
     }
     return scaledCoords;
   }
@@ -104,6 +120,9 @@ class PolygonInterface {
   }
   get _isMoving() {
     return this._state === PolygonInterface._STATES.MOVING;
+  }
+  get _isRotating() {
+    return this._state === PolygonInterface._STATES.ROTATING;
   }
 
   _scaleCoordCanvas(coord, canvas) {
@@ -141,12 +160,17 @@ class PolygonInterface {
   _onDragStart(mousePosition, canvas) {
     assertParameters(arguments, Coordinate, Canvas);
 
-    if (!this._isMoving) return;
+    if (!(this._isMoving || this._isRotating)) return;
 
     this._dragging = true;
     const inverseScaledCoord = this._inverseScaleCoordCanvas(
         mousePosition, canvas);
     this._dragLast = inverseScaledCoord;
+
+    if (this._isRotating) {
+      this._dragLastRotation = this._polygon.center.angleTo(inverseScaledCoord);
+      canvas.setCursorFor(this, Canvas.CURSOR_TYPE.ROTATING, 100);
+    }
   }
 
   _onDrag(mousePosition, canvas) {
@@ -159,15 +183,36 @@ class PolygonInterface {
     const dragDelta = inverseScaledCoord.subtract(this._dragLast);
     this._dragLast = inverseScaledCoord;
 
-    const newPosition = this._polygon.position.translate(dragDelta);
+    switch (this._state) {
 
-    Events.dispatch(PolygonInterface.EVENT_TYPES.MOVE, this._id, newPosition);
+    case PolygonInterface._STATES.MOVING:
+      const newPosition = this._polygon.position.translate(dragDelta);
+
+      Events.dispatch(PolygonInterface.EVENT_TYPES.MOVE, this._id, newPosition);
+      break;
+
+    case PolygonInterface._STATES.ROTATING:
+      const curRotation = this._polygon.center.angleTo(inverseScaledCoord);
+      const dragRotationDelta =
+          Angle.diffRadians(curRotation, this._dragLastRotation);
+      this._dragLastRotation = curRotation;
+
+      const newRotation = this._polygon.rotation.rotate(dragRotationDelta);
+
+      Events.dispatch(
+          PolygonInterface.EVENT_TYPES.ROTATE, this._id, newRotation);
+      break;
+    }
   }
 
   _onDragEnd() {
     assertParameters(arguments, Coordinate, Canvas);
 
     if (!this._dragging) return;
+
+    if (this._isRotating) {
+      canvas.setCursorFor(this, Canvas.CURSOR_TYPE.ROTATE, 100);
+    }
 
     this._dragging = false;
   }
@@ -178,6 +223,8 @@ class PolygonInterface {
     const color = this._isIdle ?
         COLORS.POLYGON_INTERFACE_IDLE : COLORS.POLYGON_INTERFACE_ACTIVE;
     canvas.drawPolygon(this._scaledCoords, color, true);
+
+    canvas.drawCircle(this._scaleCoordCanvas(this._polygon.center, canvas), 5, PolygonPointInterface._DOT_COLOR);
   }
 
   _drawInstructions(canvas) {
@@ -192,11 +239,13 @@ class PolygonInterface {
 PolygonInterface._STATES = {
   IDLE: 0,
   EDITING: 1,
-  MOVING: 2
+  MOVING: 2,
+  ROTATING: 3
 };
 
 PolygonInterface.EVENT_TYPES = {
-  MOVE: 'polyint-move'
+  MOVE: 'polyint-move',
+  ROTATE: 'polyint-rotate'
 };
 
 PolygonInterface._EDIT_INSTRUCTIONS =

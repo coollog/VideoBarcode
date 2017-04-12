@@ -2,13 +2,13 @@
 // import 'DOMInterfaceTableKeyframeRow'
 // import 'DOMInterfaceTablePolygonRow'
 // import 'DOMInterfaceTablePolygonPositionRow'
+// import 'DOMInterfaceTablePolygonRotationRow'
 // import 'Events'
 // import 'FrameModel'
 // import 'jquery'
 
 /**
  * Sets up and controls the frame table interface.
- * TODO: Refactor all the inline DOM selectors.
  */
 class DOMInterfaceTable {
   constructor(frameModel) {
@@ -21,6 +21,8 @@ class DOMInterfaceTable {
     this._polygonRows = {};
     // Map from id to DOMInterfaceTablePolygonPositionRow.
     this._polygonPositionRows = {};
+    // Map from id to DOMInterfaceTablePolygonRotationRow.
+    this._polygonRotationRows = {};
 
     // The currently-selected polygon.
     this._currentPolygon = null;
@@ -36,11 +38,15 @@ class DOMInterfaceTable {
     Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON, this._addPolygonRow, this);
     Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON,
         this._addPolygonPositionRow, this);
+    Events.on(FrameModel.EVENT_TYPES.ADD_POLYGON,
+        this._addPolygonRotationRow, this);
 
     Events.on(FrameModel.EVENT_TYPES.REMOVE_POLYGON,
         this._removePolygonRow, this);
     Events.on(FrameModel.EVENT_TYPES.REMOVE_POLYGON,
         this._removePolygonPositionRow, this);
+    Events.on(FrameModel.EVENT_TYPES.REMOVE_POLYGON,
+        this._removePolygonRotationRow, this);
 
     Events.on(FrameModel.EVENT_TYPES.CHANGE_FRAME, this._changeFrame, this);
 
@@ -48,6 +54,10 @@ class DOMInterfaceTable {
         this._addPositionKeyFrame, this);
     Events.on(FrameModel.EVENT_TYPES.REMOVE_POSITION_KEYFRAME,
         this._removePositionKeyFrame, this);
+    Events.on(FrameModel.EVENT_TYPES.ADD_ROTATION_KEYFRAME,
+        this._addRotationKeyFrame, this);
+    Events.on(FrameModel.EVENT_TYPES.REMOVE_ROTATION_KEYFRAME,
+        this._removeRotationKeyFrame, this);
   }
 
   get currentPolygon() {
@@ -150,6 +160,31 @@ class DOMInterfaceTable {
     this._removeRow(rowId);
   }
 
+  _addPolygonRotationRow(polygonId) {
+    assertParameters(arguments, Number);
+
+    const rowId = DOMInterfaceTable._POLYGON_ROTATION_ROW_ID(polygonId);
+    const rowContent = DOMInterfaceTable._POLYGON_ROTATION_ROW_CONTENT(
+        this._frameModel.getPolygonRotation(polygonId));
+    this._addRow(
+        rowId, `keyframe-row`, rowContent, `kf-polyrotation`, (i) => ``);
+
+    const newPolygonRotationRow =
+        new DOMInterfaceTablePolygonRotationRow(polygonId, rowId, false);
+    newPolygonRotationRow.currentFrame = this._frameModel.currentFrameIndex;
+    this._polygonRotationRows[polygonId] = newPolygonRotationRow;
+  }
+
+  _removePolygonRotationRow(polygonId) {
+    assertParameters(arguments, Number);
+
+    this._polygonRotationRows[polygonId].remove();
+    delete this._polygonRotationRows[polygonId];
+
+    const rowId = DOMInterfaceTable._POLYGON_ROTATION_ROW_ID(polygonId);
+    this._removeRow(rowId);
+  }
+
   _addFrameNumbersRow() {
     assertParameters(arguments);
 
@@ -190,6 +225,25 @@ class DOMInterfaceTable {
           this._frameModel.getPolygon(positionRow.polygonId).position;
       positionRow.changePosition(position);
     }
+
+    for (let rotationRow of Object.values(this._polygonRotationRows)) {
+      rotationRow.currentFrame = frameIndex;
+
+      const rotation =
+          this._frameModel.getPolygon(rotationRow.polygonId).rotation;
+      rotationRow.changeRotation(rotation);
+    }
+  }
+
+  _removeKeyFrameIfNone(frameIndex, polygonId) {
+    const hasPositionKeyframe =
+        this._polygonPositionRows[polygonId].hasKeyframe(frameIndex);
+    const hasRotationKeyframe =
+        this._polygonRotationRows[polygonId].hasKeyframe(frameIndex);
+
+    if (hasPositionKeyframe || hasRotationKeyframe) return;
+
+    this._polygonRows[polygonId].removeKeyframe(frameIndex);
   }
 
   _addPositionKeyFrame(frameIndex, polygonId) {
@@ -202,8 +256,22 @@ class DOMInterfaceTable {
   _removePositionKeyFrame(frameIndex, polygonId) {
     assertParameters(arguments, Number, Number);
 
-    this._polygonRows[polygonId].removeKeyframe(frameIndex);
     this._polygonPositionRows[polygonId].removeKeyframe(frameIndex);
+    this._removeKeyFrameIfNone(frameIndex, polygonId);
+  }
+
+  _addRotationKeyFrame(frameIndex, polygonId) {
+    assertParameters(arguments, Number, Number);
+
+    this._polygonRows[polygonId].addKeyframe(frameIndex);
+    this._polygonRotationRows[polygonId].addKeyframe(frameIndex);
+  }
+
+  _removeRotationKeyFrame(frameIndex, polygonId) {
+    assertParameters(arguments, Number, Number);
+
+    this._polygonRotationRows[polygonId].removeKeyframe(frameIndex);
+    this._removeKeyFrameIfNone(frameIndex, polygonId);
   }
 };
 
@@ -217,6 +285,12 @@ DOMInterfaceTable._POLYGON_POSITION_ROW_ID = function(polygonId) {
   assertParameters(arguments, Number);
 
   return `kf-polyposition${polygonId}`;
+}
+
+DOMInterfaceTable._POLYGON_ROTATION_ROW_ID = function(polygonId) {
+  assertParameters(arguments, Number);
+
+  return `kf-polyrotation${polygonId}`;
 }
 
 DOMInterfaceTable._POLYGON_ROW_CONTENT = function(polygonId) {
@@ -234,6 +308,13 @@ DOMInterfaceTable._POLYGON_POSITION_ROW_CONTENT = function(coord) {
     x <input type="x" value="${x}"></input> &nbsp;
     y <input type="y" value="${y}"></input>
   `;
+};
+
+DOMInterfaceTable._POLYGON_ROTATION_ROW_CONTENT = function(angle) {
+  assertParameters(arguments, Angle);
+
+  const degrees = angle.degrees;
+  return `&#8635; <input value="${degrees}"></input>`;
 };
 
 DOMInterfaceTable._KEYFRAME_WIDTH = 23;

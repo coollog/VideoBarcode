@@ -66,6 +66,11 @@ html, body {
       <span id="chooseanimationslabel">Choose Animations</span>
     </label>
 
+    <label id="choosepolygons" class="fileLabel disabled">
+      <input type="file" id="polygonsfile" accept=".csv" />
+      <span id="choosepolygonslabel">Choose Polygons</span>
+    </label>
+
     <div id="choosebgdiv"></div>
 
     <div id="chooseobjects"></div>
@@ -99,6 +104,44 @@ html, body {
         <span>Choose Object ${objectId + 1} Image</span>
       </label>
     `;
+  }
+
+  function initChoosePolygons(animationModel) {
+    $('#choosepolygons').removeClass('disabled');
+    $('#polygonsfile').change(function() {
+      const file = this.files[0];
+
+      // Parse local CSV file.
+      Papa.parse(file, {
+        complete: function(results) {
+          console.log("Finished:", results.data);
+
+          animationModel.addPolygonData(results.data);
+
+          initChooseBackground(animationModel);
+
+          for (let object of animationModel.objects) {
+            const chooseHtml = getChooseObjectHtml(object.id);
+            $('#chooseobjects').append(chooseHtml);
+          }
+
+          const animationController = new AnimationController(animationModel);
+
+          $('#playdiv').html(playButtonHtml);
+          $('#play').click(function() {
+            if ($(this).attr('action') === 'play') {
+              animationController.play();
+              $(this).attr('action', 'stop').html('Stop Animation');
+            } else {
+              animationController.stop();
+              $(this).attr('action', 'play').html('Play Animation');
+            }
+          });
+
+          initChooseObjects(animationModel);
+        }
+      });
+    });
   }
 
   function initChooseImage(selector, onloadFn) {
@@ -156,27 +199,7 @@ html, body {
 
         const animationModel = new AnimationModel(results.data);
 
-        initChooseBackground(animationModel);
-
-        for (let object of animationModel.objects) {
-          const chooseHtml = getChooseObjectHtml(object.id);
-          $('#chooseobjects').append(chooseHtml);
-        }
-
-        const animationController = new AnimationController(animationModel);
-
-        $('#playdiv').html(playButtonHtml);
-        $('#play').click(function() {
-          if ($(this).attr('action') === 'play') {
-            animationController.play();
-            $(this).attr('action', 'stop').html('Stop Animation');
-          } else {
-            animationController.stop();
-            $(this).attr('action', 'play').html('Play Animation');
-          }
-        });
-
-        initChooseObjects(animationModel);
+        initChoosePolygons(animationModel);
       }
     });
   });

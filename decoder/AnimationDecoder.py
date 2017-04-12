@@ -79,12 +79,12 @@ class AnimationDecoder:
       point = PolygonPoint(x, y)
       polygon.addPoint(point)
 
-    numKeyframes = bitStream.read(6)
-    numbers.append(numKeyframes)
+    numPositionKeyframes = bitStream.read(6)
+    numbers.append(numPositionKeyframes)
 
     firstPosition = None
 
-    for i in range(numKeyframes):
+    for i in range(numPositionKeyframes):
       frameIndex = bitStream.read(6)
       numbers.append(frameIndex)
       positionX = bitStream.read(8) - 128
@@ -102,6 +102,16 @@ class AnimationDecoder:
         point.x += firstPosition[0]
         point.y += firstPosition[1]
 
+    numRotationKeyframes = bitStream.read(6)
+
+    for i in range(numRotationKeyframes):
+      frameIndex = bitStream.read(6)
+      numbers.append(frameIndex)
+      rotation = bitStream.read(9) / 512.0 * 4 * math.pi - 2 * math.pi
+      numbers.append(rotation)
+
+      polygon.addRotation(frameIndex, rotation)
+
     print(numbers)
 
     return polygon
@@ -114,6 +124,7 @@ class Polygon:
     self._positionXFrames = AnimationFrames('x')
     self._positionYFrames = AnimationFrames('y')
 
+    self._rotationFrames = AnimationFrames('rotation')
 
   def addPoint(self, point):
     assert isinstance(point, PolygonPoint)
@@ -124,6 +135,9 @@ class Polygon:
     self._positionXFrames.setVal(frameIndex, x)
     self._positionYFrames.setVal(frameIndex, y)
 
+  def addRotation(self, frameIndex, rotation):
+    self._rotationFrames.setVal(frameIndex, rotation)
+
   @property
   def points(self):
     return self._points
@@ -132,7 +146,8 @@ class Polygon:
   def animationRows(self):
     return [
       self._positionXFrames.asRow,
-      self._positionYFrames.asRow
+      self._positionYFrames.asRow,
+      self._rotationFrames.asRow
     ]
 
   def __str__(self):
