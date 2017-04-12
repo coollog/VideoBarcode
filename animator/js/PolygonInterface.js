@@ -224,7 +224,9 @@ class PolygonInterface {
         COLORS.POLYGON_INTERFACE_IDLE : COLORS.POLYGON_INTERFACE_ACTIVE;
     canvas.drawPolygon(this._scaledCoords, color, true);
 
-    canvas.drawCircle(this._scaleCoordCanvas(this._polygon.center, canvas), 5, PolygonPointInterface._DOT_COLOR);
+    canvas.drawCircle(
+        this._scaleCoordCanvas(this._polygon.center, canvas), 2,
+        PolygonInterface._CENTER_COLOR);
   }
 
   _drawInstructions(canvas) {
@@ -235,6 +237,8 @@ class PolygonInterface {
     }
   }
 };
+
+PolygonInterface._CENTER_COLOR = COLORS.POLYGON_INTERFACE_FADED;
 
 PolygonInterface._STATES = {
   IDLE: 0,

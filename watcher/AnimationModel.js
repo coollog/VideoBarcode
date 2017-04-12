@@ -77,6 +77,8 @@ class AnimationModel {
 
       this._objects[i].coords = coords;
     }
+
+    console.log(this._objects);
   }
 
   hasAllImages() {

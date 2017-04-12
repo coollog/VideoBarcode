@@ -112,14 +112,14 @@ class AnimationController {
       const coord =
           AnimationController.Stage._scaleToStage(new Coordinate(x, y), canvas);
       const centerCoord =
-          AnimationController.Stage._scaleToStage(center, canvas);
+          AnimationController.Stage._scaleToStage(center, canvas)
+              .subtract(coord);
       const stageSize = AnimationController.Stage._getSize(canvas);
       const xScale = stageSize / image.width;
       const yScale = stageSize / image.height;
 
-      console.log('center', centerCoord);
-      console.log('rotation', rotation);
       canvas.drawImage(image, coord, xScale, yScale, centerCoord, rotation);
+      canvas.drawCircle(centerCoord, 5, 'red');
     }
 
     // Mask out non-stage areas.
