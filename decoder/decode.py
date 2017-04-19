@@ -1,6 +1,8 @@
 from AnimationDecoder import AnimationDecoder
 
-name = 'rot3'
+import sys
+
+name = sys.argv[1]
 
 decoder = AnimationDecoder()
 decoder.decode('qr%s.png' % name)

@@ -105,8 +105,8 @@ class AnimationController {
 
       if (image === undefined) continue;
 
-      const x = object.xAtFrame(this._curFrame);
-      const y = object.yAtFrame(this._curFrame);
+      const x = object.xAtFrame(this._curFrame) - object.xAtFrame(0);
+      const y = object.yAtFrame(this._curFrame) - object.yAtFrame(0);
       const rotation = object.rotationAtFrame(this._curFrame);
       const center = object.centerAtFrame(this._curFrame);
       const coord =
@@ -119,7 +119,7 @@ class AnimationController {
       const yScale = stageSize / image.height;
 
       canvas.drawImage(image, coord, xScale, yScale, centerCoord, rotation);
-      canvas.drawCircle(centerCoord, 5, 'red');
+      // canvas.drawCircle(centerCoord, 5, 'red');
     }
 
     // Mask out non-stage areas.

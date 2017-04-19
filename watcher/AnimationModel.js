@@ -27,14 +27,16 @@ class AnimationModel {
         const object = new AnimationModel.Object(objectId);
         this._objects.push(object);
 
-        object.xFrames = AnimationModel._parseArray(row.slice(1), parseInt);
+        object.xFrames =
+            AnimationModel._parseArray(row.slice(1), x => parseInt(x));
         break;
       }
 
       case 1: { // y row
         const object = this._objects[this._objects.length - 1];
 
-        object.yFrames = AnimationModel._parseArray(row.slice(1), parseInt);
+        object.yFrames =
+            AnimationModel._parseArray(row.slice(1), x => parseInt(x));
         break;
       }
 
@@ -42,7 +44,7 @@ class AnimationModel {
         const object = this._objects[this._objects.length - 1];
 
         object.rotationFrames =
-            AnimationModel._parseArray(row.slice(1), parseFloat);
+            AnimationModel._parseArray(row.slice(1), x => parseFloat(x));
 
         objectId ++;
         break;
