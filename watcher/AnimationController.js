@@ -108,18 +108,22 @@ class AnimationController {
       const x = object.xAtFrame(this._curFrame) - object.xAtFrame(0);
       const y = object.yAtFrame(this._curFrame) - object.yAtFrame(0);
       const rotation = object.rotationAtFrame(this._curFrame);
-      const center = object.centerAtFrame(this._curFrame);
+      const center = AnimationController.Stage._scaleToStage(
+            object.centerAtFrame(this._curFrame), canvas);
       const coord =
           AnimationController.Stage._scaleToStage(new Coordinate(x, y), canvas);
-      const centerCoord =
-          AnimationController.Stage._scaleToStage(center, canvas)
-              .subtract(coord);
+      const centerCoord = center.subtract(coord);
       const stageSize = AnimationController.Stage._getSize(canvas);
       const xScale = stageSize / image.width;
       const yScale = stageSize / image.height;
 
       canvas.drawImage(image, coord, xScale, yScale, centerCoord, rotation);
-      // canvas.drawCircle(centerCoord, 5, 'red');
+      // canvas.drawCircle(center, 5, 'red');
+
+      // const coords = object.coords.map((coord) => {
+      //   return AnimationController.Stage._scaleToStage(coord, canvas);
+      // })
+      // canvas.drawPolygon(coords, '#dd8800');
     }
 
     // Mask out non-stage areas.

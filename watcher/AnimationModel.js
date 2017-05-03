@@ -186,6 +186,9 @@ AnimationModel.Object = class {
         rotationFrames, AnimationModel.Object._angularInterpolate);
   }
 
+  get coords() {
+    return this._coords;
+  }
   set coords(coords) {
     assertParameters(arguments, Array);
 
