@@ -2,21 +2,21 @@ This was the original prototype for the paper [AniCode: Authoring Coded Artifact
 
 See [webpages](https://rawgit.com/coollog/VideoBarcode/master/webpages/index.html) for original reports.
 
-/animator
+*/animator*
 
 The animation tool, run by opening /animator in Google Chrome.
 
-/decoder
+*/decoder*
 
 The decoder tool, run by running /decoder/decode.py <name>, where the input
 image is qr<name>.png, and the output files are poly<name>.csv and
 anim<name.csv>.
 
-/matcher
+*/matcher*
 
 The matching code, run by opening /matcher/match.m in MatLab. Change the
 constants at the top of the file to process different images.
 
-/watcher
+*/watcher*
 
 The watcher, run by opening /watcher in Google Chrome.
