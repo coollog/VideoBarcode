@@ -1,3 +1,7 @@
+This was the original prototype for the paper [AniCode: Authoring Coded Artifacts for Network-Free Personalized Animations](https://arxiv.org/abs/1807.11627) (https://arxiv.org/abs/1807.11627).
+
+See [webpages](https://rawgit.com/coollog/VideoBarcode/master/webpages/index.html) for original reports.
+
 /animator
 
 The animation tool, run by opening /animator in Google Chrome.
